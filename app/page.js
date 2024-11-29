@@ -1,101 +1,160 @@
-import Image from "next/image";
+"use client";
+import { Box, Button, TextField, Container, Typography } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { IconButton, InputAdornment } from "@mui/material";
+import { CircularProgress } from "@mui/material";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from 'next/navigation'; // Import useRouter
 
-export default function Home() {
+export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter(); // Initialize the router
+
+  const handleLogin = async () => {
+    setLoading(true);
+    // Simulate your login logic (e.g., API call)
+    setTimeout(() => {
+      setLoading(false);
+      // Navigate to dashboard after loading is complete
+      router.push('/dashboard');
+    }, 2000); // Adjust the timeout as needed
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div
+      className="w-screen h-screen"
+      style={{
+        backgroundImage: "url('/BGlogin.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <Container className="h-full flex items-center justify-center">
+        <Box
+          className="w-[500px] h-[600px] bg-white/10 rounded-[20px] p-[50px] flex flex-col justify-center gap-[35px] animate-fade-in"
+          sx={{
+            backgroundColor: "#00000080",
+            animation: "fadeIn 0.5s ease-in-out",
+            "@keyframes fadeIn": {
+              "0%": {
+                opacity: 0,
+                transform: "translateY(20px)",
+              },
+              "100%": {
+                opacity: 1,
+                transform: "translateY(0)",
+              },
+            },
+          }}
+        >
+          <Typography
+            variant="h4"
+            className="text-center font-bold text-white text-[32px] mb-4"
+          >
+            Log In
+          </Typography>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+          <div className="flex flex-col gap-2">
+            <Typography className="text-white/90 font-medium text-[15px] ml-1">
+              Email
+            </Typography>
+            <TextField
+              fullWidth
+              placeholder="Enter your email"
+              variant="outlined"
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  color: "#494949",
+                  backgroundColor: "#F0F9FF",
+                  borderRadius: "12px",
+                  height: "56px",
+                  padding: "0 20px",
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#2762F8",
+                  },
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "transparent",
+                },
+                "& .MuiInputBase-input::placeholder": {
+                  color: "#9CA3AF",
+                  opacity: 1,
+                },
+              }}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Typography className="text-white/90 font-medium text-[15px] ml-1">
+              Password
+            </Typography>
+            <TextField
+              fullWidth
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              variant="outlined"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  color: "#494949",
+                  backgroundColor: "#F0F9FF",
+                  borderRadius: "12px",
+                  height: "56px",
+                  padding: "0 20px",
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#2762F8",
+                  },
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "transparent",
+                },
+                "& .MuiInputBase-input::placeholder": {
+                  color: "#9CA3AF",
+                  opacity: 1,
+                },
+              }}
+            />
+          </div>
+
+          <Link href="/forgot-password">
+            <Typography className="text-white/80 text-[14px] text-right hover:text-white cursor-pointer ">
+              forgot password ?
+            </Typography>
+          </Link>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleLogin} // Call handleLogin function
+            sx={{
+              backgroundColor: "#2762F8",
+              height: "56px",
+              borderRadius: "12px",
+              fontSize: "16px",
+              fontWeight: 600,
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#1e4fd6",
+              },
+            }}
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
+          </Button>
+        </Box>
+      </Container>
     </div>
   );
 }
