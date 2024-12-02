@@ -132,12 +132,14 @@ export default function UserCreateDialog({
 
   // จัดการการเลือกสิทธิ์
   const handlePermissionClick = (permission) => {
-    if (selectedPermissions.includes(permission)) {
-      setSelectedPermissions(
-        selectedPermissions.filter((p) => p !== permission)
-      );
-    } else {
-      setSelectedPermissions([...selectedPermissions, permission]);
+    if (typeof permission === 'string') {
+      if (selectedPermissions.includes(permission)) {
+        setSelectedPermissions(
+          selectedPermissions.filter((p) => p !== permission)
+        );
+      } else {
+        setSelectedPermissions([...selectedPermissions, permission]);
+      }
     }
   };
 
