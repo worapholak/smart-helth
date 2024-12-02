@@ -4,16 +4,30 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import HomeIcon from "@mui/icons-material/Home";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Avatar, IconButton, Tooltip } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname(); // ใช้เพื่อดึง path ปัจจุบัน
+
+  // สร้างข้อความต้อนรับตาม path
+  const getWelcomeMessage = () => {
+    switch (pathname) {
+      case "/dashboard":
+        return "Welcome to Smart Health - Dashboard";
+      case "/user-management":
+        return "Welcome to Smart Health - User Management";
+      default:
+        return "Welcome to Smart Health Dashboard - System is running smoothly";
+    }
+  };
+
   return (
     <div className="h-[70px] grid grid-cols-[0.22fr_1.7fr_0.5fr] items-center px-6 ">
       <div className="flex items-center gap-2">
         <Tooltip title="Back" arrow>
           <IconButton
-            onClick={() => router.back()} // เพิ่ม onClick handler
+            onClick={() => router.back()}
             size="small"
             sx={{
               backgroundColor: "#E0E0E0",
@@ -33,7 +47,7 @@ export default function Navbar() {
 
         <Tooltip title="Refresh" arrow>
           <IconButton
-            onClick={() => window.location.reload()} // หรือ router.refresh()
+            onClick={() => window.location.reload()}
             size="small"
             sx={{
               backgroundColor: "#E0E0E0",
@@ -53,7 +67,7 @@ export default function Navbar() {
 
         <Tooltip title="Home" arrow>
           <IconButton
-           onClick={() => router.push('/dashboard')} 
+            onClick={() => router.push("/dashboard")}
             size="small"
             sx={{
               backgroundColor: "#1a73e8",
@@ -77,7 +91,7 @@ export default function Navbar() {
       <div className="w-full">
         <div className="bg-white rounded-[10px] border border-gray-100 px-6 py-[10px] w-full h-full shadow-lg overflow-hidden">
           <div className="whitespace-nowrap animate-marquee">
-            Welcome to Smart Health Dashboard - System is running smoothly
+            {getWelcomeMessage()}
           </div>
         </div>
       </div>

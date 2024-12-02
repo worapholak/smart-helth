@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -11,6 +11,7 @@ import {
   Avatar,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import AllDevices from "./AllDevices";
 
 export default function UserCreateDialog({
   open,
@@ -20,6 +21,7 @@ export default function UserCreateDialog({
 }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [showAllDevices, setShowAllDevices] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -109,6 +111,7 @@ export default function UserCreateDialog({
 
     onSubmit(newUser);
     onClose();
+    setShowConfirmDialog(false);
     setFormData({
       name: "",
       phone: "",
@@ -132,7 +135,7 @@ export default function UserCreateDialog({
 
   // จัดการการเลือกสิทธิ์
   const handlePermissionClick = (permission) => {
-    if (typeof permission === 'string') {
+    if (typeof permission === "string") {
       if (selectedPermissions.includes(permission)) {
         setSelectedPermissions(
           selectedPermissions.filter((p) => p !== permission)
@@ -158,6 +161,19 @@ export default function UserCreateDialog({
     }
     setShowConfirmDialog(true);
   };
+
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  // อัพเดท useEffect เพื่อตรวจสอบความถูกต้องของฟอร์ม
+  useEffect(() => {
+    const isValid =
+      formData.name !== "" &&
+      formData.phone !== "" &&
+      formData.email !== "" &&
+      !errors.phone &&
+      !errors.email;
+    setIsFormValid(isValid);
+  }, [formData, errors]);
 
   return (
     <Dialog
@@ -372,6 +388,7 @@ export default function UserCreateDialog({
           </Box>
 
           <Button
+           onClick={() => setShowAllDevices(true)}
             variant="contained"
             endIcon={<AddIcon />}
             sx={{
@@ -398,11 +415,24 @@ export default function UserCreateDialog({
         </Box>
       </DialogContent>
 
+      {showAllDevices && (
+ <AllDevices
+   open={showAllDevices}
+   onClose={() => setShowAllDevices(false)}
+   filteredDevices={[]} // Add your devices data
+   selectedDevices={[]}
+   selectAll={false}
+   handleSelectAll={() => {}}
+   handleSelect={() => {}}
+   handleDelete={() => {}}
+ />
+)}
+
       <DialogActions sx={{ px: 3, pb: 3, gap: 2, justifyContent: "center" }}>
         <Button
           variant="contained"
           onClick={handleConfirmDialogOpen}
-          disabled={!!errors.phone || !!errors.email}
+          disabled={!isFormValid}
           sx={{
             borderRadius: "12px",
             width: 140,
@@ -455,56 +485,57 @@ export default function UserCreateDialog({
           },
         }}
       >
-        <DialogContent sx={{ textAlign: "center", py: 3 }}>
+        <DialogContent sx={{ textAlign: "center" }}>
           <Typography
-            sx={{
-              fontSize: "18px",
-              fontWeight: 600,
-              color: "#333",
-              mb: 2,
-            }}
+            sx={{ fontSize: "18px", fontWeight: 600, color: "#333", mb: 3 }}
           >
             ยืนยันการเพิ่ม{userType === "admin" ? "ผู้ดูแลระบบ" : "ผู้ใช้งาน"} ?
           </Typography>
+
           <Box sx={{ mb: 3, textAlign: "left" }}>
             <Typography sx={{ color: "#666", mb: 1 }}>
-              <strong>ชื่อ:</strong> {formData.name || "ไม่ระบุ"}
+              ชื่อ-นามสกุล: {formData.name}
             </Typography>
             <Typography sx={{ color: "#666", mb: 1 }}>
-              <strong>เบอร์ติดต่อ:</strong> {formData.phone || "ไม่ระบุ"}
+              เบอร์ติดต่อ: {formData.phone}
             </Typography>
             <Typography sx={{ color: "#666", mb: 1 }}>
-              <strong>อีเมล:</strong> {formData.email || "ไม่ระบุ"}
+              อีเมล์: {formData.email}
             </Typography>
             <Typography sx={{ color: "#666", mb: 1 }}>
               สิทธิ์การใช้งาน:
             </Typography>
-
+            <Box sx={{ pl: 2 }}>
+              {selectedPermissions.includes("view") && (
+                <Typography sx={{ color: "#666", mb: 0.5 }}>
+                  • ดูข้อมูล
+                </Typography>
+              )}
+              {selectedPermissions.includes("control") && (
+                <Typography sx={{ color: "#666", mb: 0.5 }}>
+                  • ควบคุมระบบ
+                </Typography>
+              )}
+              {selectedPermissions.includes("edit") && (
+                <Typography sx={{ color: "#666", mb: 0.5 }}>
+                  • แก้ไขข้อมูลผู้ใช้งาน
+                </Typography>
+              )}
+            </Box>
             <Typography sx={{ color: "#666", mt: 1 }}>
-              จำนวนอุปกรณ์ทั้งหมด:
-              {formData.deviceCount || "ไม่ระบุ"}เครื่อง
+              จำนวนอุปกรณ์ทั้งหมด: {formData.deviceCount} เครื่อง
             </Typography>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 2,
-              mt: 3,
-            }}
-          >
+
+          <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
             <Button
               variant="contained"
               onClick={handleSubmit}
               disabled={!!errors.phone || !!errors.email}
               sx={{
-                borderRadius: "12px",
-                width: 140,
-                height: 48,
                 bgcolor: "#2762F8",
-                fontSize: "16px",
-                fontWeight: 600,
-                textTransform: "none",
+                borderRadius: "8px",
+                width: "100px",
                 "&:hover": {
                   bgcolor: "#1c4fd6",
                 },
@@ -524,10 +555,6 @@ export default function UserCreateDialog({
                 borderColor: "#2762F8",
                 borderRadius: "8px",
                 width: "100px",
-                "&:hover": {
-                  borderColor: "#2762F8",
-                  bgcolor: "transparent",
-                },
               }}
             >
               ยกเลิก

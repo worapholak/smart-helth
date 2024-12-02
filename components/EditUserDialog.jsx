@@ -15,6 +15,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import SearchBar from "@/components/SearchBar";
 import AddIcon from "@mui/icons-material/Add";
+import AllDevices from "./AllDevices";
 
 export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -22,6 +23,7 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedDevices, setSelectedDevices] = useState([]);
+  const [showAllDevices, setShowAllDevices] = useState(false);
   const [errors, setErrors] = useState({
     phone: "",
     email: "",
@@ -199,18 +201,20 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
 
   const handleDeleteConfirm = () => {
     const remainingCount = devices.length - selectedDevices.length;
-    
+
     // อัพเดตเฉพาะจำนวนอุปกรณ์
     const updatedData = {
-      deviceCount: remainingCount
+      deviceCount: remainingCount,
     };
-  
+
     // เรียก onUpdate โดยส่งเฉพาะ deviceCount
     onUpdate(userData.id, updatedData);
-  
+
     // รีเซ็ตค่าต่างๆ
-    setDevices(prev => prev.filter((_, i) => !selectedDevices.includes(i)));
-    setFilteredDevices(prev => prev.filter((_, i) => !selectedDevices.includes(i)));
+    setDevices((prev) => prev.filter((_, i) => !selectedDevices.includes(i)));
+    setFilteredDevices((prev) =>
+      prev.filter((_, i) => !selectedDevices.includes(i))
+    );
     setSelectedDevices([]);
     setSelectAll(false);
     setShowDeleteConfirmDialog(false);
@@ -539,6 +543,17 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
             ยกเลิก
           </Button>
         </DialogActions>
+        {showAllDevices && (
+          <AllDevices
+            filteredDevices={filteredDevices}
+            selectedDevices={selectedDevices}
+            selectAll={selectAll}
+            handleSelectAll={handleSelectAll}
+            handleSelect={handleSelect}
+            handleDelete={() => setShowDeleteConfirmDialog(true)}
+            onClose={() => setShowAllDevices(false)}
+          />
+        )}
       </Dialog>
 
       <Dialog
@@ -572,6 +587,7 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
             <Button
               variant="contained"
               endIcon={<AddIcon />}
+              onClick={() => setShowAllDevices(true)}
               sx={{
                 bgcolor: "#2762F8",
                 borderRadius: "30px",
@@ -776,6 +792,20 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
           </Button>
         </DialogActions>
       </Dialog>
+      {showAllDevices && (
+  <AllDevices
+    open={showAllDevices}
+    onClose={() => setShowAllDevices(false)}
+    filteredDevices={filteredDevices}
+    selectedDevices={selectedDevices}
+    selectAll={selectAll}
+    handleSelectAll={handleSelectAll} 
+    handleSelect={handleSelect}
+    handleDelete={() => setShowDeleteConfirmDialog(true)}
+    onSearch={handleSearch}
+    SearchBar={<SearchBar onSearch={handleSearch} />}
+  />
+)}
 
       <Dialog
         open={showDeleteConfirmDialog}

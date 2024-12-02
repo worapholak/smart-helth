@@ -218,19 +218,33 @@ export default function UserManagement() {
       setShowAddUserDialog(true);
     }
   };
-  const CircleIcon = styled("div")({
-    width: "24px",
-    height: "24px",
-    borderRadius: "50%",
-    backgroundColor: "#FF0000",
-    color: "#FFFFFF",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "14px",
-    fontWeight: 600,
-     boxShadow: "0px 2px 4px rgba(255, 0, 0, 0.25)",
-  });
+const CircleIcon = styled("div")({
+  width: "24px",
+  height: "24px",
+  borderRadius: "50%",
+  backgroundColor: "#FF0000",
+  color: "#FFFFFF",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "14px",
+  fontWeight: 600,
+  boxShadow: "0px 2px 4px rgba(255, 0, 0, 0.25)",
+  animation: "bounce 1s infinite", // กำหนดให้ icon เด้ง
+
+  "@keyframes bounce": {
+    "0%": {
+      transform: "translateY(0)",
+    },
+    "50%": {
+      transform: "translateY(-10px)", // เด้งขึ้น
+    },
+    "100%": {
+      transform: "translateY(0)", // กลับลง
+    },
+  },
+});
+
 
   const columns = [
     {
