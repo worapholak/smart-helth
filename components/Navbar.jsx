@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 export default function Navbar() {
   const router = useRouter();
   return (
-    <div className="h-[70px] grid grid-cols-[0.22fr_1.7fr_0.5fr] items-center px-6">
+    <div className="h-[70px] grid grid-cols-[0.22fr_1.7fr_0.5fr] items-center px-6 ">
       <div className="flex items-center gap-2">
         <Tooltip title="Back" arrow>
           <IconButton

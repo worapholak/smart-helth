@@ -7,6 +7,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'], // ใช้ "Inter" แทนฟอนต์ดีฟอลต์
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

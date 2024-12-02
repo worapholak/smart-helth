@@ -1,25 +1,79 @@
-"use client";
-import { Box, Button, TextField, Container, Typography } from "@mui/material";
+'use client';
+import { Box, Button, TextField, Typography } from "@mui/material";
+import { Container as MuiContainer } from '@mui/material';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { IconButton, InputAdornment } from "@mui/material";
 import { CircularProgress } from "@mui/material";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter } from 'next/navigation';
+
+const styles = {
+  textField: {
+    '& .MuiOutlinedInput-root': {
+      color: '#494949',
+      backgroundColor: '#F0F9FF',
+      borderRadius: '12px',
+      height: '56px',
+      padding: '0 20px',
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#2762F8',
+      },
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'transparent',
+    },
+    '& .MuiInputBase-input::placeholder': {
+      color: '#9CA3AF',
+      opacity: 1,
+    },
+  },
+  loginButton: {
+    backgroundColor: '#2762F8',
+    height: '56px',
+    borderRadius: '12px',
+    fontSize: '16px',
+    fontWeight: 600,
+    textTransform: 'none',
+    '&:hover': {
+      backgroundColor: '#1e4fd6',
+    },
+    '&.Mui-disabled': {  // เพิ่มส่วนนี้
+      backgroundColor: '#2762F8', 
+      color: '#ffffff'
+    },
+  }
+};
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter(); // Initialize the router
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
+  const router = useRouter();
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!email) newErrors.email = 'Email is required';
+    if (!password) newErrors.password = 'Password is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleLogin = async () => {
-    setLoading(true);
-    // Simulate your login logic (e.g., API call)
-    setTimeout(() => {
-      setLoading(false);
-      // Navigate to dashboard after loading is complete
+    if (!validateForm()) return;
+    
+    try {
+      setLoading(true);
+      // API call simulation
+      await new Promise(resolve => setTimeout(resolve, 2000));
       router.push('/dashboard');
-    }, 2000); // Adjust the timeout as needed
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,7 +86,7 @@ export default function LoginPage() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <Container className="h-full flex items-center justify-center">
+      <MuiContainer className="h-full flex items-center justify-center">
         <Box
           className="w-[500px] h-[600px] bg-white/10 rounded-[20px] p-[50px] flex flex-col justify-center gap-[35px] animate-fade-in"
           sx={{
@@ -65,25 +119,11 @@ export default function LoginPage() {
               fullWidth
               placeholder="Enter your email"
               variant="outlined"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  color: "#494949",
-                  backgroundColor: "#F0F9FF",
-                  borderRadius: "12px",
-                  height: "56px",
-                  padding: "0 20px",
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#2762F8",
-                  },
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "transparent",
-                },
-                "& .MuiInputBase-input::placeholder": {
-                  color: "#9CA3AF",
-                  opacity: 1,
-                },
-              }}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={!!errors.email}
+              helperText={errors.email}
+              sx={styles.textField}
             />
           </div>
 
@@ -96,6 +136,10 @@ export default function LoginPage() {
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               variant="outlined"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!errors.password}
+              helperText={errors.password}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -108,53 +152,27 @@ export default function LoginPage() {
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  color: "#494949",
-                  backgroundColor: "#F0F9FF",
-                  borderRadius: "12px",
-                  height: "56px",
-                  padding: "0 20px",
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#2762F8",
-                  },
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "transparent",
-                },
-                "& .MuiInputBase-input::placeholder": {
-                  color: "#9CA3AF",
-                  opacity: 1,
-                },
-              }}
+              sx={styles.textField}
             />
           </div>
 
           <Link href="/forgot-password">
-            <Typography className="text-white/80 text-[14px] text-right hover:text-white cursor-pointer ">
+            <Typography className="text-white/80 text-[14px] text-right hover:text-white cursor-pointer">
               forgot password ?
             </Typography>
           </Link>
+
           <Button
             variant="contained"
             fullWidth
-            onClick={handleLogin} // Call handleLogin function
-            sx={{
-              backgroundColor: "#2762F8",
-              height: "56px",
-              borderRadius: "12px",
-              fontSize: "16px",
-              fontWeight: 600,
-              textTransform: "none",
-              "&:hover": {
-                backgroundColor: "#1e4fd6",
-              },
-            }}
+            onClick={handleLogin}
+            disabled={loading}
+            sx={styles.loginButton}
           >
             {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
           </Button>
         </Box>
-      </Container>
+      </MuiContainer>
     </div>
   );
 }

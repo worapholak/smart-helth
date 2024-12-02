@@ -5,6 +5,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-noto-sans-thai: var(--font-noto-sans-thai);
+
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,12 +34,35 @@
   animation: fadeIn 0.5s ease-in-out;
 }
 
+
 * {
-  font-family: 'Inter', sans-serif;
- }
+  font-family: inherit;
+}
+
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-noto-sans-thai), system-ui, sans-serif;
+}
+
+/* เลือก scrollbar ทั้งหมด */
+::-webkit-scrollbar {
+  width: 10px; /* ความกว้างของ scrollbar */
+}
+
+/* เลือกพื้นหลังของ scrollbar */
+::-webkit-scrollbar-track {
+  background: transparent; /* สีพื้นหลัง */
+}
+
+/* เลือกส่วนแถบเลื่อนตัวเอง */
+::-webkit-scrollbar-thumb {
+  background: #E0E0E0; /* สีของแถบเลื่อน */
+  border-radius: 0 20px 20px 0; /* รัศมีของมุมของแถบเลื่อน */
+}
+
+/* เลือกส่วนแถบเลื่อนเมื่อชี้ไปที่ scrollbar */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* สีของแถบเลื่อนเมื่อชี้ไปที่มัน */
 }
