@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -17,7 +17,12 @@ const links = [
 ];
 
 export default function Sidebar() {
+  const router = useRouter();
   const pathname = usePathname();
+
+  const handleNavigation = (href) => {
+    router.push(href);
+  };
 
   return (
     <div className="w-[250px] h-screen bg-[#F5F7FD] py-[20px] flex items-center justify-center">
@@ -26,46 +31,46 @@ export default function Sidebar() {
         {links.map(({ href, icon, label }) => {
           const isActive = pathname === href;
           return (
-            <Link key={href} href={href} style={{ textDecoration: "none" }}>
-              <ListItemButton
+            <ListItemButton
+              key={href}
+              onClick={() => handleNavigation(href)}
+              sx={{
+                height: "85px",
+                backgroundColor: isActive ? "#2762F8" : "transparent",
+                color: isActive ? "#fff" : "#7C7C7C",
+                transition: "all 0.2s ease",
+                boxShadow: isActive
+                  ? "0 4px 12px rgba(39, 98, 248, 0.25)"
+                  : "none",
+                "&:hover": {
+                  backgroundColor: "#2762F8",
+                  color: "#fff",
+                  boxShadow: "0 20px 12px rgba(39, 98, 248, 0.25)",
+                },
+                cursor: "pointer"
+              }}
+            >
+              <ListItemIcon
                 sx={{
-                  height: "85px",
-                  backgroundColor: isActive ? "#2762F8" : "transparent",
-                  color: isActive ? "#fff" : "#7C7C7C",
-                  transition: "all 0.3s ease",
-                  boxShadow: isActive
-                    ? "0 4px 12px rgba(39, 98, 248, 0.25)"
-                    : "none",
-                  "&:hover": {
-                    backgroundColor: "#2762F8",
-                    color: "#fff",
-                    boxShadow: "0 20px 12px rgba(39, 98, 248, 0.25)",
-            
+                  color: "inherit",
+                  minWidth: 40,
+                  "& .MuiSvgIcon-root": {
+                    fontSize: 24,
+                    transition: "all 0.2s ease",
                   },
                 }}
               >
-                <ListItemIcon
-                  sx={{
-                    color: "inherit",
-                    minWidth: 40,
-                    "& .MuiSvgIcon-root": {
-                      fontSize: 24,
-                      transition: "all 0.3s ease",
-                    },
-                  }}
-                >
-                  {icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={label}
-                  primaryTypographyProps={{
-                    fontSize: 15,
-                    fontWeight: 500,
-                    transition: "all 0.3s ease",
-                  }}
-                />
-              </ListItemButton>
-            </Link>
+                {icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={label}
+                primaryTypographyProps={{
+                  fontSize: 15,
+                  fontWeight: 500,
+                  transition: "all 0.2s ease",
+                }}
+              />
+            </ListItemButton>
           );
         })}
       </div>

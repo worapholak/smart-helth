@@ -14,16 +14,13 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Typography,
-  TextField,
   Box,
-  Avatar,
-  InputAdornment,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import Tooltip from "@mui/material/Tooltip";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Menu, MenuItem } from "@mui/material";
 import { Fade } from "@mui/material";
@@ -218,46 +215,54 @@ export default function UserManagement() {
       setShowAddUserDialog(true);
     }
   };
-const CircleIcon = styled("div")({
-  width: "24px",
-  height: "24px",
-  borderRadius: "50%",
-  backgroundColor: "#FF0000",
-  color: "#FFFFFF",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "14px",
-  fontWeight: 600,
-  boxShadow: "0px 2px 4px rgba(255, 0, 0, 0.25)",
-  animation: "bounce 1s infinite", // กำหนดให้ icon เด้ง
+  const CircleIcon = styled("div")({
+    width: "24px",
+    height: "24px",
+    borderRadius: "50%",
+    backgroundColor: "#FF0000",
+    color: "#FFFFFF",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "14px",
+    fontWeight: 600,
+    boxShadow: "0px 2px 4px rgba(255, 0, 0, 0.25)",
+    animation: "bounce 1s infinite", // กำหนดให้ icon เด้ง
 
-  "@keyframes bounce": {
-    "0%": {
-      transform: "translateY(0)",
+    "@keyframes bounce": {
+      "0%": {
+        transform: "translateY(0)",
+      },
+      "50%": {
+        transform: "translateY(-10px)", // เด้งขึ้น
+      },
+      "100%": {
+        transform: "translateY(0)", // กลับลง
+      },
     },
-    "50%": {
-      transform: "translateY(-10px)", // เด้งขึ้น
-    },
-    "100%": {
-      transform: "translateY(0)", // กลับลง
-    },
-  },
-});
-
+  });
 
   const columns = [
     {
       field: "id",
       headerName: "เลขประจำตัว",
       width: 130,
-      sortable: false,
+      sortable: true,
+      filterable: true,
       disableColumnMenu: true,
       flex: 1,
       headerAlign: "center",
       align: "center",
       renderCell: (params) => (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center", // เพิ่ม justify-content: center
+            width: "100%", // เพิ่ม width: 100% เพื่อให้ Box กินพื้นที่เต็มคอลัมน์
+            gap: 1,
+          }}
+        >
           {params.value}
           {params.row.isNew && <CircleIcon>N</CircleIcon>}
         </Box>
@@ -267,7 +272,8 @@ const CircleIcon = styled("div")({
       field: "name",
       headerName: "ชื่อ-นามสกุล",
       width: 160,
-      sortable: false,
+      sortable: true,
+      filterable: true,
       disableColumnMenu: true,
       flex: 1,
       headerAlign: "center",
@@ -277,7 +283,8 @@ const CircleIcon = styled("div")({
       field: "status",
       headerName: "สถานะ",
       width: 100,
-      sortable: false,
+      sortable: true,
+      filterable: true,
       disableColumnMenu: true,
       flex: 1,
       headerAlign: "center",
@@ -287,7 +294,8 @@ const CircleIcon = styled("div")({
       field: "phone",
       headerName: "เบอร์ติดต่อ",
       width: 120,
-      sortable: false,
+      sortable: true,
+      filterable: true,
       disableColumnMenu: true,
       flex: 1,
       headerAlign: "center",
@@ -297,7 +305,8 @@ const CircleIcon = styled("div")({
       field: "email",
       headerName: "อีเมล์",
       width: 250,
-      sortable: false,
+      sortable: true,
+      filterable: true,
       disableColumnMenu: true,
       flex: 1.5,
       headerAlign: "center",
@@ -307,7 +316,8 @@ const CircleIcon = styled("div")({
       field: "actions",
       headerName: "การดำเนินการ",
       width: 300,
-      sortable: false,
+      sortable: true,
+      filterable: true,
       disableColumnMenu: true,
       flex: 2,
       headerAlign: "center",
@@ -374,7 +384,8 @@ const CircleIcon = styled("div")({
       field: "deviceCount",
       headerName: "จำนวนอุปกรณ์",
       width: 110,
-      sortable: false,
+      sortable: true,
+      filterable: true,
       disableColumnMenu: true,
       flex: 1,
       headerAlign: "center",
@@ -384,7 +395,8 @@ const CircleIcon = styled("div")({
       field: "edit",
       headerName: "",
       width: 50,
-      sortable: false,
+      sortable: true,
+      filterable: true,
       disableColumnMenu: true,
       headerAlign: "center",
       align: "center",
@@ -404,7 +416,8 @@ const CircleIcon = styled("div")({
       field: "delete",
       headerName: "",
       width: 70,
-      sortable: false,
+      sortable: true,
+      filterable: true,
       disableColumnMenu: true,
       headerAlign: "center",
       align: "center",
@@ -443,22 +456,24 @@ const CircleIcon = styled("div")({
             </Box>
 
             <Box sx={{ ml: 1 }}>
-              <Fab
-                color="primary"
-                aria-label="add"
-                onClick={handleFabClick}
-                sx={{
-                  backgroundColor: "#2762F8",
-                  transform: "scale(1.1)",
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    backgroundColor: "#1557b0",
-                    transform: "scale(1.15)",
-                  },
-                }}
-              >
-                <AddIcon />
-              </Fab>
+              <Tooltip title="เพิ่มผู้ดูแล / เพิ่มผู้ใช้งาน" arrow>
+                <Fab
+                  color="primary"
+                  aria-label="add"
+                  onClick={handleFabClick}
+                  sx={{
+                    backgroundColor: "#2762F8",
+                    transform: "scale(1.1)",
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      backgroundColor: "#1557b0",
+                      transform: "scale(1.15)",
+                    },
+                  }}
+                >
+                  <AddIcon />
+                </Fab>
+              </Tooltip>
             </Box>
           </Box>
 
@@ -624,14 +639,9 @@ const CircleIcon = styled("div")({
               }}
               sx={{
                 border: "none",
-                height: "100%",
-                flexGrow: 1,
-                "& .MuiDataGrid-main": {
-                  width: "100%",
-                },
+                height: "100%", // ให้เต็มความสูง container
                 "& .MuiDataGrid-columnHeaders": {
                   backgroundColor: "#f8f9fa",
-                  borderBottom: "1px solid #e0e0e0",
                 },
                 "& .MuiDataGrid-virtualScroller": {
                   width: "100%",

@@ -17,6 +17,12 @@ export default function Navbar() {
         return "Welcome to Smart Health - Dashboard";
       case "/user-management":
         return "Welcome to Smart Health - User Management";
+      case "/map":
+        return "Welcome to Smart Health - Map";
+      case "/device":
+        return "Welcome to Smart Health - Device";
+      case "/report":
+        return "Welcome to Smart Health - Report";
       default:
         return "Welcome to Smart Health Dashboard - System is running smoothly";
     }

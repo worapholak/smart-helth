@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -388,7 +388,7 @@ export default function UserCreateDialog({
           </Box>
 
           <Button
-           onClick={() => setShowAllDevices(true)}
+            onClick={() => setShowAllDevices(true)}
             variant="contained"
             endIcon={<AddIcon />}
             sx={{
@@ -416,17 +416,17 @@ export default function UserCreateDialog({
       </DialogContent>
 
       {showAllDevices && (
- <AllDevices
-   open={showAllDevices}
-   onClose={() => setShowAllDevices(false)}
-   filteredDevices={[]} // Add your devices data
-   selectedDevices={[]}
-   selectAll={false}
-   handleSelectAll={() => {}}
-   handleSelect={() => {}}
-   handleDelete={() => {}}
- />
-)}
+        <AllDevices
+          open={showAllDevices}
+          onClose={() => setShowAllDevices(false)}
+          filteredDevices={[]} // Add your devices data
+          selectedDevices={[]}
+          selectAll={false}
+          handleSelectAll={() => {}}
+          handleSelect={() => {}}
+          handleDelete={() => {}}
+        />
+      )}
 
       <DialogActions sx={{ px: 3, pb: 3, gap: 2, justifyContent: "center" }}>
         <Button

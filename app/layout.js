@@ -1,8 +1,11 @@
+// app/layout.js
 "use client";
 
+import { Suspense } from 'react';
 import { Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const notoSansThai = Noto_Sans_Thai({
   subsets: ["thai"],
@@ -34,7 +37,11 @@ export default function RootLayout({ children }) {
       <body
         className={`${notoSansThai.variable} ${notoSansThai.className} antialiased`}
       >
-        <ThemeWrapper>{children}</ThemeWrapper>
+        <ThemeWrapper>
+          <Suspense fallback={<LoadingSpinner />}>
+            {children}
+          </Suspense>
+        </ThemeWrapper>
       </body>
     </html>
   );

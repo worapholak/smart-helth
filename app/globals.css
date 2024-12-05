@@ -66,3 +66,7 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #555; /* สีของแถบเลื่อนเมื่อชี้ไปที่มัน */
 }
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+}
