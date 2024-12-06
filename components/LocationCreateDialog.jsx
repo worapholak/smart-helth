@@ -22,11 +22,13 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
     name: "",
     type: "",
     phone: "",
+    email: "",
     address: "",
   });
 
   const [errors, setErrors] = useState({
     phone: "",
+    email: "", // Add email error
   });
 
   const [selectedImage, setSelectedImage] = useState(null);
@@ -44,17 +46,26 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
 
   // เพิ่มฟังก์ชัน validate
   const validatePhone = (phone) => {
-    const phoneRegex = /^([0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$/;
+    const mobileRegex = /^([0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$/;
+    const bangkokRegex = /^(02[0-9]{7}|02-[0-9]{3}-[0-9]{4})$/;
+
     if (!phone) {
       return "กรุณากรอกเบอร์โทรศัพท์";
     }
-    if (!phoneRegex.test(phone.replace(/-/g, ""))) {
+
+    const cleanPhone = phone.replace(/-/g, "");
+
+    if (cleanPhone.startsWith("02")) {
+      if (!bangkokRegex.test(phone)) {
+        return "เบอร์โทรศัพท์ไม่ถูกต้อง (ตัวอย่าง: 021234567 หรือ 02-123-4567)";
+      }
+    } else if (!mobileRegex.test(phone)) {
       return "เบอร์โทรศัพท์ไม่ถูกต้อง (ตัวอย่าง: 0812345678 หรือ 081-234-5678)";
     }
+
     return "";
   };
 
-  // จัดการการเปลี่ยนแปลงข้อมูลในฟอร์ม
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -62,19 +73,20 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
       [name]: value,
     });
 
-    // Reset error เมื่อมีการพิมพ์
     setErrors({
       ...errors,
       [name]: "",
     });
 
-    // Validate ตามฟิลด์
     if (name === "phone") {
       const phoneError = validatePhone(value);
       setErrors((prev) => ({ ...prev, phone: phoneError }));
     }
+    if (name === "email") {
+      const emailError = validateEmail(value);
+      setErrors((prev) => ({ ...prev, email: emailError }));
+    }
   };
-
   const handleSubmit = () => {
     setShowSummary(true);
   };
@@ -85,7 +97,9 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
       formData.name !== "" &&
       formData.type !== "" &&
       formData.phone !== "" &&
-      !errors.phone;
+      formData.email !== "" && // Add email check
+      !errors.phone &&
+      !errors.email;
     setIsFormValid(isValid);
   }, [formData, errors]);
 
@@ -94,12 +108,15 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
       name: "",
       type: "",
       phone: "",
+      email: "",
       address: "",
     });
     setSelectedImage(null);
     setErrors({
       phone: "",
+      email: "",
     });
+    setSelectedDevices([]); // เพิ่มบรรทัดนี้
     onClose();
   };
 
@@ -141,16 +158,33 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
   const [showSummary, setShowSummary] = useState(false);
 
   const handleSummaryConfirm = () => {
+    const selectedDevicesData = selectedDevices
+      .map((deviceId) => {
+        const device = sampleDevices.find((d) => d.id === deviceId);
+        return device ? { ...device, id: `device-${device.id}` } : null;
+      })
+      .filter(Boolean);
+
     onSubmit({
       ...formData,
+      id: `${Date.now()}`, // เพิ่ม id ที่ไม่ซ้ำ
       image: selectedImage,
-      selectedDevices: selectedDevices.map((i) => sampleDevices[i]),
+      selectedDevices: selectedDevicesData,
     });
+    setSelectedDevices([]);
     handleClose();
     setShowSummary(false);
   };
 
   const [isFormValid, setIsFormValid] = useState(false);
+
+  // Add email validation
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) return "กรุณากรอกอีเมล";
+    if (!emailRegex.test(email)) return "รูปแบบอีเมลไม่ถูกต้อง";
+    return "";
+  };
 
   return (
     <Dialog
@@ -183,7 +217,7 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
           sx={{
             display: "flex",
             justifyContent: "center",
-            mb: 4,
+            mb: 0,
             position: "relative",
           }}
         >
@@ -285,6 +319,23 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
             }}
           />
 
+          <TextField
+            fullWidth
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            label="อีเมล"
+            error={!!errors.email}
+            helperText={errors.email}
+            variant="outlined"
+            sx={{
+              mb: 2,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "12px",
+              },
+            }}
+          />
+
           <Box sx={{ position: "relative", mb: 2 }}>
             <Box sx={{ position: "relative" }}>
               <TextField
@@ -341,14 +392,20 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
           )}
           <Button
             variant="contained"
-            endIcon={<AddIcon />}
+            endIcon={
+              selectedDevices.length > 0 ? (
+                <Typography sx={{ ml: 0 }}>{selectedDevices.length}</Typography>
+              ) : (
+                <AddIcon />
+              )
+            }
             onClick={() => setOpenDevices(true)}
             sx={{
               bgcolor: "#2762F8",
               borderRadius: "30px",
               textTransform: "none",
               color: "#FFFFFF",
-              py: 1.5,
+              py: 1,
               transition: "all 0.2s ease",
               boxShadow: "none",
               "&:hover": {
@@ -367,7 +424,8 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
           <AllDevices
             open={openDevices}
             onClose={() => setOpenDevices(false)}
-            selectedDevices={selectedDevices}
+            onDevicesSelect={setSelectedDevices}
+            selectedDevices={selectedDevices} // ส่ง selectedDevices โดยตรง ไม่ต้อง map
             selectAll={selectAll}
             handleSelectAll={handleSelectAll}
             handleSelect={handleSelect}
@@ -443,6 +501,9 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
                     เบอร์ติดต่อ: {formData.phone}
                   </Typography>
                   <Typography variant="body1">
+                    อีเมล: {formData.email}
+                  </Typography>
+                  <Typography variant="body1">
                     ที่อยู่: {formData.address}
                   </Typography>
                 </Box>
@@ -458,15 +519,18 @@ export default function LocationCreateDialog({ open, onClose, onSubmit }) {
                   อุปกรณ์ที่เลือก ({selectedDevices.length})
                 </Typography>
                 <Box sx={{ pl: 2, maxHeight: 200, overflowY: "auto" }}>
-                  {selectedDevices.map((i) => (
-                    <Typography
-                      key={sampleDevices[i].id}
-                      variant="body2"
-                      sx={{ mb: 0.5 }}
-                    >
-                      • {sampleDevices[i].name} ({sampleDevices[i].type})
-                    </Typography>
-                  ))}
+                  {selectedDevices.map((deviceId) => {
+                    const device = sampleDevices.find((d) => d.id === deviceId);
+                    return (
+                      <Typography
+                        key={deviceId}
+                        variant="body2"
+                        sx={{ mb: 0.5 }}
+                      >
+                        • {device?.name} ({device?.type})
+                      </Typography>
+                    );
+                  })}
                 </Box>
               </Box>
             </Box>

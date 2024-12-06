@@ -20,8 +20,30 @@ import AddIcon from "@mui/icons-material/Add";
 import Tooltip from "@mui/material/Tooltip";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EditDeviceDialog from "@/components/EditDeviceDialog";
+import DeviceCreateDialog from "@/components/DeviceCreateDialog";
 
 export default function DevicePage() {
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showAddSuccessDialog, setShowAddSuccessDialog] = useState(false);
+const [showEditSuccessDialog, setShowEditSuccessDialog] = useState(false);
+
+const handleAddDevice = (newDevice) => {
+  const deviceWithId = {
+    ...newDevice,
+    id: `13${Date.now().toString().slice(-10)}`,
+    isNew: true
+  };
+  const resetNewFlags = (prevRows) => 
+    prevRows.map(row => ({...row, isNew: false}));
+
+  setRows(prev => [...resetNewFlags(prev), deviceWithId]);
+  setFilteredRows(prev => [...resetNewFlags(prev), deviceWithId]);
+
+  setShowCreateDialog(false);
+  setShowAddSuccessDialog(true);
+  setTimeout(() => setShowAddSuccessDialog(false), 3000);
+ };
+
   const [rows, setRows] = useState([
     {
       id: "1306662820851",
@@ -78,18 +100,17 @@ export default function DevicePage() {
   const [deviceToEdit, setDeviceToEdit] = useState(null);
 
   const handleUpdateDevice = (deviceId, updatedData) => {
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === deviceId ? { ...row, ...updatedData } : row
-      )
+    setRows(prevRows => 
+      prevRows.map(row => row.id === deviceId ? {...row, ...updatedData} : row)
     );
-    setFilteredRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === deviceId ? { ...row, ...updatedData } : row
-      )
+    setFilteredRows(prevRows =>
+      prevRows.map(row => row.id === deviceId ? {...row, ...updatedData} : row)
     );
     setShowEditDialog(false);
-  };
+    setShowEditSuccessDialog(true);
+    setTimeout(() => setShowEditSuccessDialog(false), 3000);
+   };
+   
 
   const handleSearch = (query) => {
     if (!query) {
@@ -142,10 +163,37 @@ export default function DevicePage() {
     {
       field: "id",
       headerName: "เลขประจำตัวอุปกรณ์",
-      width: 150,
       flex: 1,
       headerAlign: "center",
       align: "center",
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", gap: 1 }}>
+          {params.value}
+          {params.row.isNew && (
+            <Box sx={{
+              width: "24px",
+              height: "24px",
+              borderRadius: "50%", 
+              bgcolor: "#FF0000",
+              color: "#FFF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "14px",
+              fontWeight: 600,
+              boxShadow: "0 2px 4px rgba(255,0,0,0.25)",
+              animation: "bounce 1s infinite",
+              "@keyframes bounce": {
+                "0%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-10px)" },
+                "100%": { transform: "translateY(0)" }
+              }
+            }}>
+              N
+            </Box>
+          )}
+        </Box>
+      )
     },
     {
       field: "deviceId",
@@ -243,6 +291,7 @@ export default function DevicePage() {
               <Tooltip title="เพิ่มอุปกรณ์" arrow>
                 <Fab
                   color="primary"
+                  onClick={() => setShowCreateDialog(true)}
                   sx={{
                     backgroundColor: "#2762F8",
                     "&:hover": {
@@ -254,8 +303,13 @@ export default function DevicePage() {
                 </Fab>
               </Tooltip>
             </Box>
+            <DeviceCreateDialog
+            open={showCreateDialog}
+            onClose={() => setShowCreateDialog(false)}
+            onAdd={handleAddDevice}
+          />
           </Box>
-
+ 
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-[16px] text-gray-700">
               อุปกรณ์ทั้งหมด{" "}
@@ -486,6 +540,50 @@ export default function DevicePage() {
           deviceData={deviceToEdit}
           onUpdate={handleUpdateDevice}
         />
+ 
+<Dialog
+ open={showAddSuccessDialog}
+ onClose={() => setShowAddSuccessDialog(false)}
+ sx={{
+   "& .MuiDialog-paper": {
+     borderRadius: "12px",
+     padding: "30px",
+     width: "450px",
+   },
+ }}
+>
+ <DialogContent sx={{ textAlign: "center", py: 3 }}>
+   <CheckCircleIcon sx={{ fontSize: 64, color: "#4CAF50", mb: 2 }} />
+   <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: "#4CAF50" }}>
+     เพิ่มข้อมูลสำเร็จ
+   </Typography>
+   <Typography variant="body1" sx={{ color: "#666" }}>
+     ข้อมูลอุปกรณ์ใหม่ถูกเพิ่มเข้าสู่ระบบแล้ว
+   </Typography>
+ </DialogContent>
+</Dialog>
+
+<Dialog
+ open={showEditSuccessDialog}
+ onClose={() => setShowEditSuccessDialog(false)}
+ sx={{
+   "& .MuiDialog-paper": {
+     borderRadius: "12px",
+     padding: "30px", 
+     width: "450px",
+   },
+ }}
+>
+ <DialogContent sx={{ textAlign: "center", py: 3 }}>
+   <CheckCircleIcon sx={{ fontSize: 64, color: "#4CAF50", mb: 2 }} />
+   <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: "#4CAF50" }}>
+     แก้ไขข้อมูลสำเร็จ
+   </Typography>
+   <Typography variant="body1" sx={{ color: "#666" }}>
+     ข้อมูลได้รับการอัพเดทเรียบร้อยแล้ว
+   </Typography>
+ </DialogContent>
+</Dialog>
       </div>
     </div>
   );

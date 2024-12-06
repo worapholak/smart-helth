@@ -90,6 +90,7 @@ export default function UserManagement() {
 
     const userWithNewFlag = {
       ...newUser,
+      deviceCount: newUser.selectedDevices?.length || 0,
       isNew: true,
     };
 

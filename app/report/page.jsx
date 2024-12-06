@@ -215,7 +215,7 @@ export default function ReportPage() {
              backgroundColor: "white",
              borderRadius: "12px",
              p: 3,
-             minHeight: "calc(100vh - 250px)",
+             minHeight: "calc(100vh - 300px)",
              boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
            }}
          >

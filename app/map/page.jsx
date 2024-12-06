@@ -99,9 +99,9 @@ export default function MapPage() {
   const handleLocationSubmit = (newLocation) => {
     const locationWithNewFlag = {
       ...newLocation,
+      deviceCount: newLocation.selectedDevices?.length || 0,
       isNew: true,
     };
-
     setLocations((prev) => [...prev, locationWithNewFlag]);
     setFilteredLocations((prev) => [...prev, locationWithNewFlag]);
     setShowLocationDialog(false);
@@ -149,15 +149,51 @@ export default function MapPage() {
     setShowEditDialog(true);
   };
 
+  const [selectedDevices, setSelectedDevices] = useState([]); // เพิ่ม state นี้
+
   const columns = [
     {
       field: "id",
       headerName: "รหัสประจำตัว",
       width: 150,
       flex: 1,
-      headerAlign: "center",
+      headerAlign: "center", 
       align: "center",
-    },
+      renderCell: (params) => (
+        <Box sx={{ 
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          gap: 1
+        }}>
+          {params.value}
+          {params.row.isNew && (
+            <Box sx={{
+              width: "24px",
+              height: "24px", 
+              borderRadius: "50%",
+              bgcolor: "#FF0000",
+              color: "#FFFFFF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "14px",
+              fontWeight: 600,
+              boxShadow: "0px 2px 4px rgba(255, 0, 0, 0.25)",
+              animation: "bounce 1s infinite",
+              "@keyframes bounce": {
+                "0%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-10px)" },
+                "100%": { transform: "translateY(0)" }
+              }
+            }}>
+              N
+            </Box>
+          )}
+        </Box>
+      )
+     },
     {
       field: "name",
       headerName: "ชื่อสถานที่",
@@ -205,6 +241,7 @@ export default function MapPage() {
       flex: 1,
       headerAlign: "center",
       align: "center",
+      renderCell: (params) => params.row.deviceCount, // แก้ไขให้แสดงค่าจาก row
     },
     {
       field: "actions",

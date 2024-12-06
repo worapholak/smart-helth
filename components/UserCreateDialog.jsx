@@ -22,6 +22,14 @@ export default function UserCreateDialog({
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [showAllDevices, setShowAllDevices] = useState(false);
+  const [selectedDevices, setSelectedDevices] = useState([]);
+
+  const sampleDevices = Array.from({ length: 100 }, (_, i) => ({
+    id: `DEV-${String(i + 1).padStart(3, "0")}`,
+    name: `Device ${i + 1}`,
+    type:
+      (i + 1) % 3 === 0 ? "Type A" : (i + 1) % 3 === 1 ? "Type B" : "Type C",
+  }));
 
   const [formData, setFormData] = useState({
     name: "",
@@ -34,19 +42,26 @@ export default function UserCreateDialog({
     phone: "",
     email: "",
   });
-
-  // เพิ่มฟังก์ชัน validate
   const validatePhone = (phone) => {
-    const phoneRegex = /^([0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$/;
+    const mobileRegex = /^([0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$/;
+    const bangkokRegex = /^(02[0-9]{7}|02-[0-9]{3}-[0-9]{4})$/;
+
     if (!phone) {
       return "กรุณากรอกเบอร์โทรศัพท์";
     }
-    if (!phoneRegex.test(phone.replace(/-/g, ""))) {
+
+    const cleanPhone = phone.replace(/-/g, "");
+
+    if (cleanPhone.startsWith("02")) {
+      if (!bangkokRegex.test(phone)) {
+        return "เบอร์โทรศัพท์ไม่ถูกต้อง (ตัวอย่าง: 021234567 หรือ 02-123-4567)";
+      }
+    } else if (!mobileRegex.test(phone)) {
       return "เบอร์โทรศัพท์ไม่ถูกต้อง (ตัวอย่าง: 0812345678 หรือ 081-234-5678)";
     }
+
     return "";
   };
-
   const validateEmail = (email) => {
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!email) {
@@ -84,24 +99,14 @@ export default function UserCreateDialog({
   };
   // จัดการการส่งฟอร์ม
   const handleSubmit = () => {
-    const phoneError = validatePhone(formData.phone);
-    const emailError = validateEmail(formData.email);
-
-    if (phoneError || emailError) {
-      setErrors({
-        phone: phoneError,
-        email: emailError,
-      });
-      return;
-    }
-
     const newUser = {
       id: Date.now().toString(),
       name: formData.name,
       status: userType === "admin" ? "ผู้ดูแลระบบ" : "ผู้ใช้งาน",
       phone: formData.phone,
       email: formData.email,
-      deviceCount: 0,
+      deviceCount: selectedDevices.length,
+      selectedDevices: selectedDevices,
       permissions: {
         viewData: selectedPermissions.includes("view"),
         controlSystem: selectedPermissions.includes("control"),
@@ -110,8 +115,15 @@ export default function UserCreateDialog({
     };
 
     onSubmit(newUser);
-    onClose();
+    handleClose();
     setShowConfirmDialog(false);
+  };
+
+  const handleConfirmDialogOpen = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleClose = () => {
     setFormData({
       name: "",
       phone: "",
@@ -119,18 +131,13 @@ export default function UserCreateDialog({
       deviceCount: 0,
     });
     setSelectedPermissions([]);
+    setSelectedDevices([]); // Reset selected devices
+    setShowAllDevices(false); // Close devices dialog
     setErrors({
       phone: "",
       email: "",
     });
-  };
-
-  const handleConfirmDialogOpen = () => {
-    setShowConfirmDialog(true);
-  };
-
-  const handleCloseConfirmDialog = () => {
-    setShowConfirmDialog(false);
+    onClose();
   };
 
   // จัดการการเลือกสิทธิ์
@@ -390,7 +397,13 @@ export default function UserCreateDialog({
           <Button
             onClick={() => setShowAllDevices(true)}
             variant="contained"
-            endIcon={<AddIcon />}
+            endIcon={
+              selectedDevices.length > 0 ? (
+                <Typography sx={{ ml: 0 }}>{selectedDevices.length}</Typography>
+              ) : (
+                <AddIcon />
+              )
+            }
             sx={{
               bgcolor: "#2762F8",
               borderRadius: "30px",
@@ -419,12 +432,8 @@ export default function UserCreateDialog({
         <AllDevices
           open={showAllDevices}
           onClose={() => setShowAllDevices(false)}
-          filteredDevices={[]} // Add your devices data
-          selectedDevices={[]}
-          selectAll={false}
-          handleSelectAll={() => {}}
-          handleSelect={() => {}}
-          handleDelete={() => {}}
+          onDevicesSelect={setSelectedDevices}
+          selectedDevices={selectedDevices}
         />
       )}
 
@@ -454,7 +463,7 @@ export default function UserCreateDialog({
         </Button>
         <Button
           variant="outlined"
-          onClick={onClose}
+          onClick={handleClose}
           sx={{
             borderRadius: "12px",
             width: 140,
@@ -523,8 +532,22 @@ export default function UserCreateDialog({
               )}
             </Box>
             <Typography sx={{ color: "#666", mt: 1 }}>
-              จำนวนอุปกรณ์ทั้งหมด: {formData.deviceCount} เครื่อง
+              จำนวนอุปกรณ์ที่เลือก: {selectedDevices.length} เครื่อง
             </Typography>
+            <Box sx={{ pl: 2, maxHeight: 200, overflowY: "auto", mt: 1 }}>
+              {selectedDevices.map((deviceId) => {
+                const device = sampleDevices.find((d) => d.id === deviceId);
+                return (
+                  <Typography
+                    key={deviceId}
+                    variant="body2"
+                    sx={{ color: "#666", mb: 0.5 }}
+                  >
+                    • {device?.name} ({device?.type})
+                  </Typography>
+                );
+              })}
+            </Box>
           </Box>
 
           <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>

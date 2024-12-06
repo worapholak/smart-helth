@@ -94,13 +94,23 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
     }
   }, [userData]);
   const validatePhone = (phone) => {
-    const phoneRegex = /^([0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$/;
+    const mobileRegex = /^([0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$/;
+    const bangkokRegex = /^(02[0-9]{7}|02-[0-9]{3}-[0-9]{4})$/;
+    
     if (!phone) {
       return "กรุณากรอกเบอร์โทรศัพท์";
     }
-    if (!phoneRegex.test(phone.replace(/-/g, ""))) {
+    
+    const cleanPhone = phone.replace(/-/g, "");
+    
+    if (cleanPhone.startsWith("02")) {
+      if (!bangkokRegex.test(phone)) {
+        return "เบอร์โทรศัพท์ไม่ถูกต้อง (ตัวอย่าง: 021234567 หรือ 02-123-4567)";
+      }
+    } else if (!mobileRegex.test(phone)) {
       return "เบอร์โทรศัพท์ไม่ถูกต้อง (ตัวอย่าง: 0812345678 หรือ 081-234-5678)";
     }
+    
     return "";
   };
 

@@ -1,71 +1,55 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Box } from "@mui/material";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 
 const OpenStreetMap = () => {
   const mapRef = useRef(null);
-  const containerRef = useRef(null);
-  const [L, setL] = useState(null);
+  const mapInstanceRef = useRef(null);
 
   useEffect(() => {
-    let isMounted = true;
-    const loadLeaflet = async () => {
+    const initMap = async () => {
       try {
-        const leaflet = await import("leaflet");
-        if (!isMounted) return;
-        setL(leaflet.default);
+        const L = (await import("leaflet")).default;
+
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.remove();
+        }
+
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+          iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+          shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+        });
+
+        const map = L.map(mapRef.current).setView([13.736717, 100.523186], 13);
+        mapInstanceRef.current = map;
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        requestAnimationFrame(() => map.invalidateSize());
       } catch (error) {
-        console.error("Failed to load Leaflet:", error);
+        console.error("Map initialization error:", error);
       }
     };
-    loadLeaflet();
+
+    if (mapRef.current) {
+      initMap();
+    }
+
     return () => {
-      isMounted = false;
-      if (mapRef.current) mapRef.current.remove();
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+      }
     };
   }, []);
 
-  useEffect(() => {
-    if (!L || !containerRef.current) return;
-
-    try {
-      // กำหนดค่าเริ่มต้นสำหรับ icon
-      delete L.Icon.Default.prototype._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-        iconUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-        shadowUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-      });
-
-      // สร้างแผนที่และกำหนดตำแหน่งเริ่มต้น (กรุงเทพฯ)
-      const map = L.map(containerRef.current).setView(
-        [13.736717, 100.523186],
-        13
-      );
-      mapRef.current = map;
-
-      // เพิ่ม tile layer จาก OpenStreetMap
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(map);
-
-      // ปรับขนาดแผนที่
-      setTimeout(() => map.invalidateSize(), 100);
-
-    } catch (error) {
-      console.error("Error initializing map:", error);
-    }
-  }, [L, containerRef.current]);
-
   return (
     <Box
-      ref={containerRef}
+      ref={mapRef}
       sx={{
         height: "100%",
         width: "100%",
@@ -79,7 +63,4 @@ const OpenStreetMap = () => {
   );
 };
 
-// ใช้ dynamic import เพื่อหลีกเลี่ยงปัญหา SSR
-export default dynamic(() => Promise.resolve(OpenStreetMap), {
-  ssr: false,
-});
+export default dynamic(() => Promise.resolve(OpenStreetMap), { ssr: false });
