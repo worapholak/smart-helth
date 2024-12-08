@@ -96,13 +96,13 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
   const validatePhone = (phone) => {
     const mobileRegex = /^([0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$/;
     const bangkokRegex = /^(02[0-9]{7}|02-[0-9]{3}-[0-9]{4})$/;
-    
+
     if (!phone) {
       return "กรุณากรอกเบอร์โทรศัพท์";
     }
-    
+
     const cleanPhone = phone.replace(/-/g, "");
-    
+
     if (cleanPhone.startsWith("02")) {
       if (!bangkokRegex.test(phone)) {
         return "เบอร์โทรศัพท์ไม่ถูกต้อง (ตัวอย่าง: 021234567 หรือ 02-123-4567)";
@@ -110,7 +110,7 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
     } else if (!mobileRegex.test(phone)) {
       return "เบอร์โทรศัพท์ไม่ถูกต้อง (ตัวอย่าง: 0812345678 หรือ 081-234-5678)";
     }
-    
+
     return "";
   };
 
@@ -253,6 +253,14 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
       });
     }
   }, [userData]);
+
+  const handleDevicesSelect = (selectedDevices) => {
+    setSelectedDevices(selectedDevices);
+    setEditedData((prev) => ({
+      ...prev,
+      deviceCount: selectedDevices.length,
+    }));
+  };
 
   return (
     <>
@@ -596,7 +604,15 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
             <Button
               variant="contained"
-              endIcon={<AddIcon />}
+              endIcon={
+                selectedDevices.length > 0 ? (
+                  <Typography component="span">
+                    {selectedDevices.length}
+                  </Typography>
+                ) : (
+                  <AddIcon />
+                )
+              }
               onClick={() => setShowAllDevices(true)}
               sx={{
                 bgcolor: "#2762F8",
@@ -780,6 +796,7 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
         >
           <Button
             variant="contained"
+            onClick={() => setShowDeviceDialog(false)}
             sx={{
               borderRadius: "8px",
               width: "100px",
@@ -803,19 +820,20 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
         </DialogActions>
       </Dialog>
       {showAllDevices && (
-  <AllDevices
-    open={showAllDevices}
-    onClose={() => setShowAllDevices(false)}
-    filteredDevices={filteredDevices}
-    selectedDevices={selectedDevices}
-    selectAll={selectAll}
-    handleSelectAll={handleSelectAll} 
-    handleSelect={handleSelect}
-    handleDelete={() => setShowDeleteConfirmDialog(true)}
-    onSearch={handleSearch}
-    SearchBar={<SearchBar onSearch={handleSearch} />}
-  />
-)}
+        <AllDevices
+          open={showAllDevices}
+          onClose={() => setShowAllDevices(false)}
+          filteredDevices={filteredDevices}
+          selectedDevices={selectedDevices}
+          selectAll={selectAll}
+          handleSelectAll={handleSelectAll}
+          handleSelect={handleSelect}
+          handleDelete={() => setShowDeleteConfirmDialog(true)}
+          onSearch={handleSearch}
+          SearchBar={<SearchBar onSearch={handleSearch} />}
+          onDevicesSelect={handleDevicesSelect}
+        />
+      )}
 
       <Dialog
         open={showDeleteConfirmDialog}
@@ -853,7 +871,7 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
             <Button
               variant="contained"
               color="error"
-              onClick={handleDeleteConfirm}
+              onClick={() => setShowDeleteConfirmDialog(false)}
               sx={{
                 borderRadius: "8px",
                 width: "100px",

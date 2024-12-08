@@ -5,12 +5,13 @@ import HomeIcon from "@mui/icons-material/Home";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Avatar, IconButton, Tooltip } from "@mui/material";
 import { useRouter, usePathname } from "next/navigation";
+import { useLoadingStore } from '@/contexts/LoadingContext';
 
 export default function Navbar() {
   const router = useRouter();
-  const pathname = usePathname(); // ใช้เพื่อดึง path ปัจจุบัน
+  const pathname = usePathname();
+  const setIsLoading = useLoadingStore((state) => state.setIsLoading);
 
-  // สร้างข้อความต้อนรับตาม path
   const getWelcomeMessage = () => {
     switch (pathname) {
       case "/dashboard":
@@ -25,6 +26,18 @@ export default function Navbar() {
         return "Welcome to Smart Health - Report";
       default:
         return "Welcome to Smart Health Dashboard - System is running smoothly";
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      // Add any logout logic here (e.g., clearing tokens, state, etc.)
+      await router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -93,7 +106,6 @@ export default function Navbar() {
         </Tooltip>
       </div>
 
-      {/* Center - Notification bar */}
       <div className="w-full">
         <div className="bg-white rounded-[10px] border border-gray-100 px-6 py-[10px] w-full h-full shadow-lg overflow-hidden">
           <div className="whitespace-nowrap animate-marquee">
@@ -102,7 +114,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Right side - User profile & logout */}
       <div className="flex items-center justify-end gap-3 w-full pl-4">
         <div className="flex-1 bg-white rounded-[12px] py-2 px-4 shadow-lg border border-gray-100 flex items-center gap-3 hover:border-gray-200 transition-all duration-200">
           <Avatar
@@ -120,15 +131,16 @@ export default function Navbar() {
 
         <Tooltip title="Logout" arrow>
           <IconButton
+            onClick={handleLogout}
             size="small"
             sx={{
-              backgroundColor: "#1a73e8",
+              backgroundColor: "#FF4B4B",
               width: 36,
               height: 36,
               "&:hover": {
-                backgroundColor: "#2762F8",
+                backgroundColor: "#FF3333",
                 transform: "translateY(-1px)",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                boxShadow: "0 2px 4px rgba(255, 75, 75, 0.25)",
               },
               "& .MuiSvgIcon-root": { color: "white", fontSize: 20 },
               transition: "all 0.2s ease",

@@ -1,4 +1,5 @@
 "use client";
+import React, { useState } from "react"; // เพิ่มบรรทัดนี้
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
@@ -6,7 +7,12 @@ import PersonIcon from "@mui/icons-material/Person";
 import WatchIcon from "@mui/icons-material/Watch";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import TimeRangeSelector from "@/components/TimeRangeSelector";
 
+import TopLocations from "@/components/charts/TopLocations";
+import MemberDevices from "@/components/charts/MemberDevices";
+import LocationTypes from "@/components/charts/LocationTypes";
+import DeviceStatus from "@/components/charts/DeviceStatus";
 // ปรับปรุง ChartBox component
 const ChartBox = ({ children, bgColor = "white", className = "" }) => (
   <div
@@ -101,6 +107,20 @@ const UsersCard = () => (
 );
 
 export default function Dashboard() {
+  const [timeRanges, setTimeRanges] = useState({
+    topLocations: "วัน",
+    memberDevices: "วัน",
+    locationTypes: "วัน",
+    deviceStatus: "วัน",
+  });
+
+  const handleTimeRangeChange = (chartId, range) => {
+    setTimeRanges((prev) => ({
+      ...prev,
+      [chartId]: range,
+    }));
+    // ตรงนี้สามารถเพิ่มโลจิกเพื่อโหลดข้อมูลใหม่ตามช่วงเวลาที่เลือก
+  };
   return (
     <div className="flex h-screen bg-gradient-to-br from-[#F5F7FD] to-[#F8F9FF]">
       <Sidebar />
@@ -113,11 +133,13 @@ export default function Dashboard() {
               <h2 className="text-[20px] font-bold text-[#494949]">
                 อุปกรณ์ใช้งานของสมาชิก
               </h2>
-              <button className="px-4 py-1 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 transition-colors">
-                วัน
-              </button>
+              <TimeRangeSelector
+                onSelectRange={(range) =>
+                  handleTimeRangeChange("topLocations", range)
+                }
+              />
             </div>
-            {/* Chart content */}
+            <TopLocations timeRange={timeRanges.topLocations} />
           </ChartBox>
 
           <ChartBox>
@@ -125,11 +147,13 @@ export default function Dashboard() {
               <h2 className="text-[20px] font-bold text-[#494949]">
                 สถานที่เปิดใช้งานอุปกรณ์มากที่สุด
               </h2>
-              <button className="px-4 py-1 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 transition-colors">
-                วัน
-              </button>
+              <TimeRangeSelector
+                onSelectRange={(range) =>
+                  handleTimeRangeChange("memberDevices", range)
+                }
+              />
             </div>
-            {/* Chart content */}
+            <MemberDevices timeRange={timeRanges.memberDevices} />
           </ChartBox>
 
           {/* Status Cards */}
@@ -160,10 +184,13 @@ export default function Dashboard() {
               <h2 className="text-[20px] font-bold text-[#494949]">
                 ประเภทสถานที่เปิดใช้งานอุปกรณ์มากที่สุด
               </h2>
-              <button className="px-4 py-1 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 transition-colors">
-                วัน
-              </button>
+              <TimeRangeSelector
+                onSelectRange={(range) =>
+                  handleTimeRangeChange("locationTypes", range)
+                }
+              />
             </div>
+            <LocationTypes timeRange={timeRanges.locationTypes} />
           </ChartBox>
 
           <ChartBox>
@@ -171,10 +198,13 @@ export default function Dashboard() {
               <h2 className="text-[20px] font-bold text-[#494949]">
                 สถานะอุปกรณ์
               </h2>
-              <button className="px-4 py-1 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 transition-colors">
-                วัน
-              </button>
+              <TimeRangeSelector
+                onSelectRange={(range) =>
+                  handleTimeRangeChange("deviceStatus", range)
+                }
+              />
             </div>
+            <DeviceStatus timeRange={timeRanges.deviceStatus} />
           </ChartBox>
 
           <div className="flex-1 grid grid-cols-[1fr] grid-rows-2 gap-5">
