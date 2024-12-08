@@ -1,4 +1,5 @@
 'use client';
+import Head from "next/head"; 
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { Container as MuiContainer } from '@mui/material';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -77,6 +78,24 @@ export default function LoginPage() {
   };
 
   return (
+    <>
+    <Head>
+      <title>Login - My Website</title>
+      <meta name="description" content="Log in to access your account and manage your data securely." />
+      
+      {/* Open Graph (OG) Meta Tags */}
+      <meta property="og:title" content="Login - My Website" />
+      <meta property="og:description" content="Log in to access your account and manage your data securely." />
+      <meta property="og:image" content="https://example.com/preview-image.jpg" />
+      <meta property="og:url" content="https://example.com/login" />
+      <meta property="og:type" content="website" />
+
+      {/* Twitter Meta Tags */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="Login - My Website" />
+      <meta name="twitter:description" content="Log in to access your account and manage your data securely." />
+      <meta name="twitter:image" content="https://example.com/preview-image.jpg" />
+    </Head>
     <div
       className="w-screen h-screen"
       style={{
@@ -174,5 +193,6 @@ export default function LoginPage() {
         </Box>
       </MuiContainer>
     </div>
+    </>
   );
 }
