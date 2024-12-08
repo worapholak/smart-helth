@@ -2,17 +2,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-import { 
-  ListItemButton, 
-  ListItemIcon, 
-  ListItemText,
-} from "@mui/material";
+import { ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import WatchIcon from "@mui/icons-material/Watch";
 import DescriptionIcon from "@mui/icons-material/Description";
-import { useLoadingStore } from '@/contexts/LoadingContext';
+import { useLoadingStore } from "@/contexts/LoadingContext";
 
 export default function Sidebar() {
   const router = useRouter();
@@ -28,34 +24,37 @@ export default function Sidebar() {
     { href: "/report", icon: <DescriptionIcon />, label: "Report" },
   ];
 
-  // แยก handleLoad ออกมาเป็น callback
   const handleLoad = useCallback(() => {
     setIsLoading(false);
-  }, []);
+  }, [setIsLoading]);
 
   useEffect(() => {
     setActiveLink(pathname);
-    
+    setIsLoading(false);
+
     // เมื่อหน้าโหลดเสร็จ
-    window.addEventListener('load', handleLoad);
-    
+    window.addEventListener("load", handleLoad);
+
     // ตรวจสอบว่าถ้าหน้าโหลดเสร็จแล้ว
-    if (document.readyState === 'complete') {
+    if (document.readyState === "complete") {
       handleLoad();
     }
 
     return () => {
-      window.removeEventListener('load', handleLoad);
+      window.removeEventListener("load", handleLoad);
     };
   }, [pathname, handleLoad]);
 
   const handleNavigation = async (href) => {
+    if (href === pathname) {
+      return;
+    }
     try {
       setIsLoading(true);
       setActiveLink(href);
       await router.push(href);
     } catch (error) {
-      console.error('Navigation error:', error);
+      console.error("Navigation error:", error);
       setIsLoading(false);
     }
   };
