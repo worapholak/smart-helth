@@ -23,6 +23,8 @@ export default function UserCreateDialog({
   const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [showAllDevices, setShowAllDevices] = useState(false);
   const [selectedDevices, setSelectedDevices] = useState([]);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const sampleDevices = Array.from({ length: 100 }, (_, i) => ({
     id: `DEV-${String(i + 1).padStart(3, "0")}`,
@@ -42,6 +44,7 @@ export default function UserCreateDialog({
     phone: "",
     email: "",
   });
+
   const validatePhone = (phone) => {
     const mobileRegex = /^([0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$/;
     const bangkokRegex = /^(02[0-9]{7}|02-[0-9]{3}-[0-9]{4})$/;
@@ -62,6 +65,7 @@ export default function UserCreateDialog({
 
     return "";
   };
+
   const validateEmail = (email) => {
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!email) {
@@ -73,7 +77,6 @@ export default function UserCreateDialog({
     return "";
   };
 
-  // จัดการการเปลี่ยนแปลงข้อมูลในฟอร์ม
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -81,13 +84,11 @@ export default function UserCreateDialog({
       [name]: value,
     });
 
-    // Reset error เมื่อมีการพิมพ์
     setErrors({
       ...errors,
       [name]: "",
     });
 
-    // Validate ตามฟิลด์
     if (name === "phone") {
       const phoneError = validatePhone(value);
       setErrors((prev) => ({ ...prev, phone: phoneError }));
@@ -97,7 +98,17 @@ export default function UserCreateDialog({
       setErrors((prev) => ({ ...prev, email: emailError }));
     }
   };
-  // จัดการการส่งฟอร์ม
+
+  useEffect(() => {
+    const isValid =
+      formData.name !== "" &&
+      formData.phone !== "" &&
+      formData.email !== "" &&
+      !errors.phone &&
+      !errors.email;
+    setIsFormValid(isValid);
+  }, [formData, errors]);
+
   const handleSubmit = () => {
     const newUser = {
       id: Date.now().toString(),
@@ -111,16 +122,13 @@ export default function UserCreateDialog({
         viewData: selectedPermissions.includes("view"),
         controlSystem: selectedPermissions.includes("control"),
         editUserData: selectedPermissions.includes("edit"),
+        viewPatient: selectedPermissions.includes("viewPatient"),
       },
     };
 
     onSubmit(newUser);
     handleClose();
     setShowConfirmDialog(false);
-  };
-
-  const handleConfirmDialogOpen = () => {
-    setShowConfirmDialog(true);
   };
 
   const handleClose = () => {
@@ -131,8 +139,8 @@ export default function UserCreateDialog({
       deviceCount: 0,
     });
     setSelectedPermissions([]);
-    setSelectedDevices([]); // Reset selected devices
-    setShowAllDevices(false); // Close devices dialog
+    setSelectedDevices([]);
+    setShowAllDevices(false);
     setErrors({
       phone: "",
       email: "",
@@ -140,7 +148,6 @@ export default function UserCreateDialog({
     onClose();
   };
 
-  // จัดการการเลือกสิทธิ์
   const handlePermissionClick = (permission) => {
     if (typeof permission === "string") {
       if (selectedPermissions.includes(permission)) {
@@ -152,8 +159,6 @@ export default function UserCreateDialog({
       }
     }
   };
-
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const handleSubmitClick = () => {
     const phoneError = validatePhone(formData.phone);
@@ -168,19 +173,6 @@ export default function UserCreateDialog({
     }
     setShowConfirmDialog(true);
   };
-
-  const [isFormValid, setIsFormValid] = useState(false);
-
-  // อัพเดท useEffect เพื่อตรวจสอบความถูกต้องของฟอร์ม
-  useEffect(() => {
-    const isValid =
-      formData.name !== "" &&
-      formData.phone !== "" &&
-      formData.email !== "" &&
-      !errors.phone &&
-      !errors.email;
-    setIsFormValid(isValid);
-  }, [formData, errors]);
 
   return (
     <Dialog
@@ -211,7 +203,6 @@ export default function UserCreateDialog({
 
       <DialogContent>
         <Box sx={{ mt: 2 }}>
-          {/* Avatar Upload */}
           <Box
             sx={{
               display: "flex",
@@ -310,7 +301,7 @@ export default function UserCreateDialog({
             สิทธิ์การใช้งาน
           </Typography>
 
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 3 }}>
+          <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mb: 3 }}>
             <Button
               variant="contained"
               size="medium"
@@ -390,6 +381,40 @@ export default function UserCreateDialog({
                 >
                   แก้ไขข้อมูลผู้ใช้งาน
                 </Button>
+
+                {localStorage.getItem("currentUser") &&
+                  JSON.parse(localStorage.getItem("currentUser")).role ===
+                    "rpadmin" && (
+                    <Button
+                      variant="contained"
+                      size="medium"
+                      onClick={() => handlePermissionClick("viewPatient")}
+                      sx={{
+                        backgroundColor: selectedPermissions.includes(
+                          "viewPatient"
+                        )
+                          ? "#FCFFB2"
+                          : "#fff",
+                        color: "#494949",
+                        borderRadius: "24px",
+                        textTransform: "none",
+                        fontSize: "14px",
+                        px: 3,
+                        py: 1,
+                        fontWeight: 500,
+                        border: "1px solid #e0e0e0",
+                        "&:hover": {
+                          backgroundColor: selectedPermissions.includes(
+                            "viewPatient"
+                          )
+                            ? "#E8CDB2"
+                            : "#f5f5f5",
+                        },
+                      }}
+                    >
+                      ดูข้อมูลผู้ป่วย
+                    </Button>
+                  )}
               </>
             )}
           </Box>
@@ -440,7 +465,7 @@ export default function UserCreateDialog({
       <DialogActions sx={{ px: 3, pb: 3, gap: 2, justifyContent: "center" }}>
         <Button
           variant="contained"
-          onClick={handleConfirmDialogOpen}
+          onClick={handleSubmitClick}
           disabled={!isFormValid}
           sx={{
             borderRadius: "12px",
@@ -463,8 +488,7 @@ export default function UserCreateDialog({
         </Button>
         <Button
           variant="outlined"
-          onClick={handleClose}
-          sx={{
+          onClick={handleClose}sx={{
             borderRadius: "12px",
             width: 140,
             height: 48,
@@ -528,6 +552,11 @@ export default function UserCreateDialog({
               {selectedPermissions.includes("edit") && (
                 <Typography sx={{ color: "#666", mb: 0.5 }}>
                   • แก้ไขข้อมูลผู้ใช้งาน
+                </Typography>
+              )}
+              {selectedPermissions.includes("viewPatient") && (
+                <Typography sx={{ color: "#666", mb: 0.5 }}>
+                  • ดูข้อมูลผู้ป่วย
                 </Typography>
               )}
             </Box>

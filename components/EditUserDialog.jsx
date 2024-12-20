@@ -238,6 +238,7 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
       userData?.status === "ผู้ดูแลระบบ",
     editUserData:
       userData?.permissions?.editUserData ?? userData?.status === "ผู้ดูแลระบบ",
+    viewPatient: userData?.permissions?.viewPatient ?? false, // เพิ่ม viewPatient
   });
 
   useEffect(() => {
@@ -250,6 +251,7 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
         editUserData:
           userData.permissions?.editUserData ??
           userData.status === "ผู้ดูแลระบบ",
+        viewPatient: userData.permissions?.viewPatient ?? false, // เพิ่ม viewPatient
       });
     }
   }, [userData]);
@@ -390,7 +392,7 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
             </Typography>
 
             <Box
-              sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap", mb: 3 }}
+              sx={{ mt: 2, display: "flex", gap: 0.5, flexWrap: "wrap", mb: 3 }}
             >
               <Button
                 variant={permissions.viewData ? "contained" : "outlined"}
@@ -470,6 +472,39 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
                   >
                     แก้ไขข้อมูลผู้ใช้งาน
                   </Button>
+                  {/* เพิ่มปุ่มดูข้อมูลผู้ป่วย */}
+                  {localStorage.getItem("currentUser") &&
+                    JSON.parse(localStorage.getItem("currentUser")).role ===
+                      "rpadmin" && (
+                      <Button
+                        variant={
+                          permissions.viewPatient ? "contained" : "outlined"
+                        }
+                        onClick={() =>
+                          setPermissions((prev) => ({
+                            ...prev,
+                            viewPatient: !prev.viewPatient,
+                          }))
+                        }
+                        sx={{
+                          backgroundColor: permissions.viewPatient
+                            ? "#FFE4C4"
+                            : "transparent",
+                          color: permissions.viewPatient
+                            ? "#494949"
+                            : "#FFE4C4",
+                          borderColor: "#FFE4C4",
+                          borderRadius: "24px",
+                          textTransform: "none",
+                          fontSize: "14px",
+                          px: 3,
+                          py: 1,
+                          fontWeight: 500,
+                        }}
+                      >
+                        ดูข้อมูลผู้ป่วย
+                      </Button>
+                    )}
                 </>
               )}
             </Box>
@@ -944,6 +979,11 @@ export default function EditUserDialog({ open, onClose, userData, onUpdate }) {
               {permissions.editUserData && (
                 <Typography sx={{ color: "#666", mb: 0.5 }}>
                   • แก้ไขข้อมูลผู้ใช้งาน
+                </Typography>
+              )}
+              {permissions.viewPatient && (
+                <Typography sx={{ color: "#666", mb: 0.5 }}>
+                  • ดูข้อมูลผู้ป่วย
                 </Typography>
               )}
             </Box>

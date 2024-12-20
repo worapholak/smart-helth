@@ -28,6 +28,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 
 export default function UserManagement() {
+  const [userRole, setUserRole] = useState("");
   const [rows, setRows] = useState([
     {
       id: "130666282085",
@@ -83,6 +84,41 @@ export default function UserManagement() {
     },
   ]);
 
+  const [filteredRows, setFilteredRows] = useState(rows);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletedCount, setDeletedCount] = useState(0);
+  const [showSummaryDialog, setShowSummaryDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showEditSuccessDialog, setShowEditSuccessDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [userToEdit, setUserToEdit] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [showAddUserDialog, setShowAddUserDialog] = useState(false);
+  const [userType, setUserType] = useState("");
+  const [showAddSuccessDialog, setShowAddSuccessDialog] = useState(false);
+  const [showMultipleDeleteDialog, setShowMultipleDeleteDialog] =
+    useState(false);
+
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      const { role } = JSON.parse(currentUser);
+      setUserRole(role);
+    }
+  }, []);
+  // Cleanup timeout on component unmount or re-render
+  useEffect(() => {
+    let timeoutId;
+    if (showAddSuccessDialog) {
+      timeoutId = setTimeout(() => {
+        setShowAddSuccessDialog(false);
+      }, 3000);
+    }
+    // cleanup function
+    return () => clearTimeout(timeoutId);
+  }, [showAddSuccessDialog]);
+
   const handleAddUser = (newUser) => {
     // ลบ isNew จากผู้ใช้เก่าทั้งหมดและเพิ่ม isNew ให้ผู้ใช้ใหม่
     const resetNewFlags = (prevRows) =>
@@ -100,67 +136,58 @@ export default function UserManagement() {
       userWithNewFlag,
     ]);
     setShowAddUserDialog(false);
-    setShowAddSuccessDialog(true);
-
-    setTimeout(() => {
-      setShowAddSuccessDialog(false);
-    }, 3000);
+    handleAddSuccess();
   };
 
-  const [filteredRows, setFilteredRows] = useState(rows);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deletedCount, setDeletedCount] = useState(0);
-  const [showSummaryDialog, setShowSummaryDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showEditSuccessDialog, setShowEditSuccessDialog] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [userToEdit, setUserToEdit] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [showAddUserDialog, setShowAddUserDialog] = useState(false);
-  const [userType, setUserType] = useState("");
-  const [showAddSuccessDialog, setShowAddSuccessDialog] = useState(false);
-  const [showMultipleDeleteDialog, setShowMultipleDeleteDialog] =
-    useState(false);
+  const handleAddSuccess = () => {
+    setShowAddSuccessDialog(true);
+  };
 
   const handleSearch = (query) => {
-    if (!query) {
-      setFilteredRows(rows);
-      return;
-    }
+    try {
+      if (!query) {
+        setFilteredRows(rows);
+        return;
+      }
 
-    const searchTerms = query.toLowerCase().split(" ");
-    const filtered = rows.filter((row) => {
-      return searchTerms.every(
-        (term) =>
-          row.id.toLowerCase().includes(term) ||
-          row.name.toLowerCase().includes(term) ||
-          row.status.toLowerCase().includes(term) ||
-          row.phone.toLowerCase().includes(term) ||
-          row.email.toLowerCase().includes(term)
+      const lowercaseQuery = query.toLowerCase();
+      const filtered = rows.filter((row) =>
+        Object.values(row).some((value) =>
+          String(value).toLowerCase().includes(lowercaseQuery)
+        )
       );
-    });
 
-    setFilteredRows(filtered);
+      setFilteredRows(filtered);
+    } catch (error) {
+      console.error("Search error:", error);
+      setFilteredRows(rows); // Fallback to showing all rows on error
+    }
   };
 
   const handleUpdateUser = (userId, updatedData, updatedPermissions) => {
     setRows((prevRows) => {
       const updatedRows = prevRows.map((row) => {
-        // ลบ isNew flag เมื่อมีการแก้ไขข้อมูล
         if (row.id === userId) {
-          const validatedData = {
+          return {
             ...row,
-            ...updatedData,
-            email: updatedData.email.toLowerCase().trim(),
+            name: updatedData.name,
             phone: updatedData.phone.replace(/[^0-9]/g, ""),
-            permissions: updatedPermissions,
+            email: updatedData.email.toLowerCase().trim(),
+            permissions: {
+              viewData: updatedPermissions.viewData,
+              controlSystem: updatedPermissions.controlSystem,
+              editUserData: updatedPermissions.editUserData,
+              viewPatient: updatedPermissions.viewPatient, // เพิ่มส่วนนี้
+            },
+            deviceCount: updatedData.deviceCount,
             isNew: false,
           };
-          return validatedData;
         }
         return row;
       });
+
+      // อัพเดต filteredRows ด้วย
+      setFilteredRows(updatedRows);
       return updatedRows;
     });
 
@@ -243,199 +270,241 @@ export default function UserManagement() {
     },
   });
 
-  const columns = [
-    {
-      field: "id",
-      headerName: "เลขประจำตัว",
-      width: 130,
-      sortable: true,
-      filterable: true,
-      disableColumnMenu: true,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center", // เพิ่ม justify-content: center
-            width: "100%", // เพิ่ม width: 100% เพื่อให้ Box กินพื้นที่เต็มคอลัมน์
-            gap: 1,
-          }}
-        >
-          {params.value}
-          {params.row.isNew && <CircleIcon>N</CircleIcon>}
-        </Box>
-      ),
-    },
-    {
-      field: "name",
-      headerName: "ชื่อ-นามสกุล",
-      width: 160,
-      sortable: true,
-      filterable: true,
-      disableColumnMenu: true,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "status",
-      headerName: "สถานะ",
-      width: 100,
-      sortable: true,
-      filterable: true,
-      disableColumnMenu: true,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "phone",
-      headerName: "เบอร์ติดต่อ",
-      width: 120,
-      sortable: true,
-      filterable: true,
-      disableColumnMenu: true,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "email",
-      headerName: "อีเมล์",
-      width: 250,
-      sortable: true,
-      filterable: true,
-      disableColumnMenu: true,
-      flex: 1.5,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "actions",
-      headerName: "การดำเนินการ",
-      width: 300,
-      sortable: true,
-      filterable: true,
-      disableColumnMenu: true,
-      flex: 2,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => (
-        <div className="flex gap-2 justify-center items-center h-full">
-          {params.row.permissions?.viewData && (
-            <Button
-              variant="contained"
-              size="small"
-              sx={{
-                color: "#494949",
-                backgroundColor: "#C8FDCB",
-                borderRadius: "20px",
-                textTransform: "none",
-                fontSize: "13px",
+  const getColumns = () => {
+    const baseColumns = [
+      {
+        field: "id",
+        headerName: "เลขประจำตัว",
+        width: 130,
+        sortable: true,
+        filterable: true,
+        disableColumnMenu: true,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+        renderCell: (params) => (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              gap: 1,
+            }}
+          >
+            {params.value}
+            {params.row.isNew && <CircleIcon>N</CircleIcon>}
+          </Box>
+        ),
+      },
+      {
+        field: "name",
+        headerName: "ชื่อ-นามสกุล",
+        width: 160,
+        sortable: true,
+        filterable: true,
+        disableColumnMenu: true,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "status",
+        headerName: "สถานะ",
+        width: 100,
+        sortable: true,
+        filterable: true,
+        disableColumnMenu: true,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "phone",
+        headerName: "เบอร์ติดต่อ",
+        width: 120,
+        sortable: true,
+        filterable: true,
+        disableColumnMenu: true,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "email",
+        headerName: "อีเมล์",
+        width: 250,
+        sortable: true,
+        filterable: true,
+        disableColumnMenu: true,
+        flex: 1.5,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "actions",
+        headerName: "การดำเนินการ",
+        width: 400, // เพิ่มความกว้างเล็กน้อย
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
+        flex: 2,
+        headerAlign: "center",
+        align: "center",
+        renderCell: (params) => {
+          return (
+            <div
+              className="flex gap-1 justify-center items-center h-full overflow-hidden cursor-pointer"
+              style={{
+                minWidth: "max-content",
+
+                transition: "transform 0.3s ease-in-out",
               }}
             >
-              ดูข้อมูล
-            </Button>
-          )}
-          {params.row.status === "ผู้ดูแลระบบ" && (
-            <>
-              {params.row.permissions?.controlSystem && (
+              {params.row.permissions?.viewData && (
                 <Button
                   variant="contained"
                   size="small"
                   sx={{
-                    backgroundColor: "#D1EAFF",
                     color: "#494949",
-                    borderRadius: "20px",
+                    backgroundColor: "#C8FDCB",
+                    borderRadius: "15px", // ลดขนาดความโค้งลง
                     textTransform: "none",
-                    fontSize: "13px",
+                    fontSize: "12px", // ลดขนาดตัวอักษร
+                    padding: "4px 8px", // ลดขนาด padding
+                    minWidth: "auto", // ให้ปุ่มมีขนาดตามเนื้อหา
+                    height: "24px", // กำหนดความสูงให้เล็กลง
                   }}
                 >
-                  ควบคุมระบบ
+                  ดูข้อมูล
                 </Button>
               )}
-              {params.row.permissions?.editUserData && (
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEditClick(params);
-                  }}
-                  sx={{
-                    backgroundColor: "#FFD1EE",
-                    color: "#494949",
-                    borderRadius: "20px",
-                    textTransform: "none",
-                    fontSize: "13px",
-                  }}
-                >
-                  แก้ไขข้อมูลผู้ใช้งาน
-                </Button>
+              {params.row.status === "ผู้ดูแลระบบ" && (
+                <>
+                  {params.row.permissions?.controlSystem && (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        backgroundColor: "#D1EAFF",
+                        color: "#494949",
+                        borderRadius: "15px",
+                        textTransform: "none",
+                        fontSize: "12px",
+                        padding: "4px 8px",
+                        minWidth: "auto",
+                        height: "24px",
+                      }}
+                    >
+                      ควบคุมระบบ
+                    </Button>
+                  )}
+                  {params.row.permissions?.editUserData && (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        backgroundColor: "#FFD1EE",
+                        color: "#494949",
+                        borderRadius: "15px",
+                        textTransform: "none",
+                        fontSize: "12px",
+                        padding: "4px 8px",
+                        minWidth: "auto",
+                        height: "24px",
+                      }}
+                    >
+                      แก้ไขข้อมูล
+                    </Button>
+                  )}
+                  {params.row.permissions?.viewPatient && (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        backgroundColor: "#FFE4C4",
+                        color: "#494949",
+                        borderRadius: "15px",
+                        textTransform: "none",
+                        fontSize: "12px",
+                        padding: "4px 8px",
+                        minWidth: "auto",
+                        height: "24px",
+                      }}
+                    >
+                      ดูข้อมูลผู้ป่วย
+                    </Button>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </div>
-      ),
-    },
-    {
-      field: "deviceCount",
-      headerName: "จำนวนอุปกรณ์",
-      width: 110,
-      sortable: true,
-      filterable: true,
-      disableColumnMenu: true,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "edit",
-      headerName: "",
-      width: 50,
-      sortable: true,
-      filterable: true,
-      disableColumnMenu: true,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleEditClick(params);
-          }}
-        >
-          <EditIcon sx={{ fontSize: 20, color: "#2196F3" }} />
-        </IconButton>
-      ),
-    },
-    {
-      field: "delete",
-      headerName: "",
-      width: 70,
-      sortable: true,
-      filterable: true,
-      disableColumnMenu: true,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            setUserToDelete(params.row);
-            setShowDeleteDialog(true);
-          }}
-        >
-          <DeleteIcon sx={{ fontSize: 20, color: "#F44336" }} />
-        </IconButton>
-      ),
-    },
-  ];
+            </div>
+          );
+        },
+      },
+      {
+        field: "deviceCount",
+        headerName: "จำนวนอุปกรณ์",
+        width: 110,
+        sortable: true,
+        filterable: true,
+        disableColumnMenu: true,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+      },
+    ];
+
+    const adminColumns = [
+      ...baseColumns,
+      {
+        field: "edit",
+        headerName: "",
+        width: 50,
+        sortable: true,
+        filterable: true,
+        disableColumnMenu: true,
+        headerAlign: "center",
+        align: "center",
+        renderCell: (params) => (
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEditClick(params);
+            }}
+          >
+            <EditIcon sx={{ fontSize: 20, color: "#2196F3" }} />
+          </IconButton>
+        ),
+      },
+      {
+        field: "delete",
+        headerName: "",
+        width: 70,
+        sortable: true,
+        filterable: true,
+        disableColumnMenu: true,
+        headerAlign: "center",
+        align: "center",
+        renderCell: (params) => (
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              setUserToDelete(params.row);
+              setShowDeleteDialog(true);
+            }}
+          >
+            <DeleteIcon sx={{ fontSize: 20, color: "#F44336" }} />
+          </IconButton>
+        ),
+      },
+    ];
+
+    return userRole !== "iceuser" && userRole !== "rpuser"
+      ? adminColumns
+      : baseColumns;
+  };
 
   return (
     <div className="flex h-screen bg-[#F5F7FD]">
@@ -457,24 +526,26 @@ export default function UserManagement() {
             </Box>
 
             <Box sx={{ ml: 1 }}>
-              <Tooltip title="เพิ่มผู้ดูแล / เพิ่มผู้ใช้งาน" arrow>
-                <Fab
-                  color="primary"
-                  aria-label="add"
-                  onClick={handleFabClick}
-                  sx={{
-                    backgroundColor: "#2762F8",
-                    transform: "scale(1.1)",
-                    transition: "all 0.2s",
-                    "&:hover": {
-                      backgroundColor: "#1557b0",
-                      transform: "scale(1.15)",
-                    },
-                  }}
-                >
-                  <AddIcon />
-                </Fab>
-              </Tooltip>
+              {userRole !== "iceuser" && userRole !== "rpuser" && (
+                <Tooltip title="เพิ่มผู้ดูแล / เพิ่มผู้ใช้งาน" arrow>
+                  <Fab
+                    color="primary"
+                    aria-label="add"
+                    onClick={handleFabClick}
+                    sx={{
+                      backgroundColor: "#2762F8",
+                      transform: "scale(1.1)",
+                      transition: "all 0.2s",
+                      "&:hover": {
+                        backgroundColor: "#1557b0",
+                        transform: "scale(1.15)",
+                      },
+                    }}
+                  >
+                    <AddIcon />
+                  </Fab>
+                </Tooltip>
+              )}
             </Box>
           </Box>
 
@@ -592,41 +663,45 @@ export default function UserManagement() {
             </h2>
 
             <div className="h-[40px] flex items-center">
-              {selectedRows.length > 0 && (
-                <Button
-                  variant="contained"
-                  onClick={() => setShowMultipleDeleteDialog(true)}
-                  startIcon={<DeleteIcon sx={{ fontSize: 18 }} />}
-                  sx={{
-                    borderRadius: "8px",
-                    textTransform: "none",
-                    bgcolor: "#FF0048",
-                    height: "36px",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    boxShadow: "none",
-                    px: 2,
-                    "&:hover": {
-                      bgcolor: "#D50000",
+              {userRole !== "iceuser" &&
+                userRole !== "rpuser" &&
+                selectedRows.length > 0 && (
+                  <Button
+                    variant="contained"
+                    onClick={() => setShowMultipleDeleteDialog(true)}
+                    startIcon={<DeleteIcon sx={{ fontSize: 18 }} />}
+                    sx={{
+                      borderRadius: "8px",
+                      textTransform: "none",
+                      bgcolor: "#FF0048",
+                      height: "36px",
+                      fontSize: "14px",
+                      fontWeight: 500,
                       boxShadow: "none",
-                    },
-                    transition: "all 0.2s ease",
-                    animation: "fadeIn 0.3s ease",
-                  }}
-                >
-                  ลบข้อมูล ({selectedRows.length})
-                </Button>
-              )}
+                      px: 2,
+                      "&:hover": {
+                        bgcolor: "#D50000",
+                        boxShadow: "none",
+                      },
+                      transition: "all 0.2s ease",
+                      animation: "fadeIn 0.3s ease",
+                    }}
+                  >
+                    ลบข้อมูล ({selectedRows.length})
+                  </Button>
+                )}
             </div>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg overflow-hidden h-[calc(100vh-240px)]">
             <DataGrid
               rows={filteredRows}
-              columns={columns}
+              columns={getColumns()}
               pageSize={10}
               rowsPerPageOptions={[10]}
-              checkboxSelection
+              checkboxSelection={
+                userRole !== "iceuser" && userRole !== "rpuser"
+              }
               disableColumnResize
               onCellClick={(params, event) => {
                 if (params.field === "delete" || params.field === "edit") {
@@ -638,6 +713,7 @@ export default function UserManagement() {
               onRowSelectionModelChange={(selection) => {
                 setSelectedRows(selection);
               }}
+              hideFooter={true}
               sx={{
                 border: "none",
                 height: "100%", // ให้เต็มความสูง container

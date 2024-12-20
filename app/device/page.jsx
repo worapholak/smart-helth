@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
@@ -25,24 +25,33 @@ import DeviceCreateDialog from "@/components/DeviceCreateDialog";
 export default function DevicePage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showAddSuccessDialog, setShowAddSuccessDialog] = useState(false);
-const [showEditSuccessDialog, setShowEditSuccessDialog] = useState(false);
+  const [showEditSuccessDialog, setShowEditSuccessDialog] = useState(false);
+  const [userRole, setUserRole] = useState("");
 
-const handleAddDevice = (newDevice) => {
-  const deviceWithId = {
-    ...newDevice,
-    id: `13${Date.now().toString().slice(-10)}`,
-    isNew: true
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      const { role } = JSON.parse(currentUser);
+      setUserRole(role);
+    }
+  }, []);
+
+  const handleAddDevice = (newDevice) => {
+    const deviceWithId = {
+      ...newDevice,
+      id: `13${Date.now().toString().slice(-10)}`,
+      isNew: true,
+    };
+    const resetNewFlags = (prevRows) =>
+      prevRows.map((row) => ({ ...row, isNew: false }));
+
+    setRows((prev) => [...resetNewFlags(prev), deviceWithId]);
+    setFilteredRows((prev) => [...resetNewFlags(prev), deviceWithId]);
+
+    setShowCreateDialog(false);
+    setShowAddSuccessDialog(true);
+    setTimeout(() => setShowAddSuccessDialog(false), 3000);
   };
-  const resetNewFlags = (prevRows) => 
-    prevRows.map(row => ({...row, isNew: false}));
-
-  setRows(prev => [...resetNewFlags(prev), deviceWithId]);
-  setFilteredRows(prev => [...resetNewFlags(prev), deviceWithId]);
-
-  setShowCreateDialog(false);
-  setShowAddSuccessDialog(true);
-  setTimeout(() => setShowAddSuccessDialog(false), 3000);
- };
 
   const [rows, setRows] = useState([
     {
@@ -100,17 +109,20 @@ const handleAddDevice = (newDevice) => {
   const [deviceToEdit, setDeviceToEdit] = useState(null);
 
   const handleUpdateDevice = (deviceId, updatedData) => {
-    setRows(prevRows => 
-      prevRows.map(row => row.id === deviceId ? {...row, ...updatedData} : row)
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === deviceId ? { ...row, ...updatedData } : row
+      )
     );
-    setFilteredRows(prevRows =>
-      prevRows.map(row => row.id === deviceId ? {...row, ...updatedData} : row)
+    setFilteredRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === deviceId ? { ...row, ...updatedData } : row
+      )
     );
     setShowEditDialog(false);
     setShowEditSuccessDialog(true);
     setTimeout(() => setShowEditSuccessDialog(false), 3000);
-   };
-   
+  };
 
   const handleSearch = (query) => {
     if (!query) {
@@ -159,116 +171,135 @@ const handleAddDevice = (newDevice) => {
     }, 3000);
   };
 
-  const columns = [
-    {
-      field: "id",
-      headerName: "เลขประจำตัวอุปกรณ์",
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => (
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", gap: 1 }}>
-          {params.value}
-          {params.row.isNew && (
-            <Box sx={{
-              width: "24px",
-              height: "24px",
-              borderRadius: "50%", 
-              bgcolor: "#FF0000",
-              color: "#FFF",
+  const getColumns = () => {
+    const baseColumns = [
+      {
+        field: "id",
+        headerName: "เลขประจำตัวอุปกรณ์",
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+        renderCell: (params) => (
+          <Box
+            sx={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "14px",
-              fontWeight: 600,
-              boxShadow: "0 2px 4px rgba(255,0,0,0.25)",
-              animation: "bounce 1s infinite",
-              "@keyframes bounce": {
-                "0%": { transform: "translateY(0)" },
-                "50%": { transform: "translateY(-10px)" },
-                "100%": { transform: "translateY(0)" }
-              }
-            }}>
-              N
-            </Box>
-          )}
-        </Box>
-      )
-    },
-    {
-      field: "deviceId",
-      headerName: "ชื่ออุปกรณ์",
-      width: 150,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "deviceType",
-      headerName: "ประเภทอุปกรณ์",
-      width: 150,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "installDate",
-      headerName: "วันที่นำเข้า",
-      width: 120,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "userName",
-      headerName: "นำเข้าโดย",
-      width: 200,
-      flex: 1.5,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "location",
-      headerName: "สิทธิ์",
-      width: 200,
-      flex: 1.5,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "actions",
-      headerName: "",
-      width: 120,
-      sortable: false,
-      flex: 0.7,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => (
-        <>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDeviceToEdit(params.row);
-              setShowEditDialog(true);
+              width: "100%",
+              gap: 1,
             }}
           >
-            <EditIcon sx={{ fontSize: 20, color: "#2196F3" }} />
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDeviceToDelete(params.row);
-              setShowDeleteDialog(true);
-            }}
-          >
-            <DeleteIcon sx={{ fontSize: 20, color: "#F44336" }} />
-          </IconButton>
-        </>
-      ),
-    },
-  ];
+            {params.value}
+            {params.row.isNew && (
+              <Box
+                sx={{
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "50%",
+                  bgcolor: "#FF0000",
+                  color: "#FFF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  boxShadow: "0 2px 4px rgba(255,0,0,0.25)",
+                  animation: "bounce 1s infinite",
+                  "@keyframes bounce": {
+                    "0%": { transform: "translateY(0)" },
+                    "50%": { transform: "translateY(-10px)" },
+                    "100%": { transform: "translateY(0)" },
+                  },
+                }}
+              >
+                N
+              </Box>
+            )}
+          </Box>
+        ),
+      },
+      {
+        field: "deviceId",
+        headerName: "ชื่ออุปกรณ์",
+        width: 150,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "deviceType",
+        headerName: "ประเภทอุปกรณ์",
+        width: 150,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "installDate",
+        headerName: "วันที่นำเข้า",
+        width: 120,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "userName",
+        headerName: "นำเข้าโดย",
+        width: 200,
+        flex: 1.5,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "location",
+        headerName: "สิทธิ์",
+        width: 200,
+        flex: 1.5,
+        headerAlign: "center",
+        align: "center",
+      },
+    ];
+    const adminColumns = [
+      ...baseColumns,
+      {
+        field: "actions",
+        headerName: "",
+        width: 120,
+        sortable: false,
+        flex: 0.7,
+        headerAlign: "center",
+        align: "center",
+        renderCell: (params) => (
+          <>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeviceToEdit(params.row);
+                setShowEditDialog(true);
+              }}
+            >
+              <EditIcon sx={{ fontSize: 20, color: "#2196F3" }} />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeviceToDelete(params.row);
+                setShowDeleteDialog(true);
+              }}
+            >
+              <DeleteIcon sx={{ fontSize: 20, color: "#F44336" }} />
+            </IconButton>
+          </>
+        ),
+      },
+    ];
+
+    return userRole !== "iceuser" && userRole !== "rpuser"
+      ? adminColumns
+      : baseColumns;
+  };
 
   return (
     <div className="flex h-screen bg-[#F5F7FD]">
@@ -288,28 +319,30 @@ const handleAddDevice = (newDevice) => {
               <SearchBar onSearch={handleSearch} />
             </Box>
             <Box sx={{ ml: 1 }}>
-              <Tooltip title="เพิ่มอุปกรณ์" arrow>
-                <Fab
-                  color="primary"
-                  onClick={() => setShowCreateDialog(true)}
-                  sx={{
-                    backgroundColor: "#2762F8",
-                    "&:hover": {
-                      backgroundColor: "#1557b0",
-                    },
-                  }}
-                >
-                  <AddIcon />
-                </Fab>
-              </Tooltip>
+              {userRole !== "iceuser" && userRole !== "rpuser" && (
+                <Tooltip title="เพิ่มอุปกรณ์" arrow>
+                  <Fab
+                    color="primary"
+                    onClick={() => setShowCreateDialog(true)}
+                    sx={{
+                      backgroundColor: "#2762F8",
+                      "&:hover": {
+                        backgroundColor: "#1557b0",
+                      },
+                    }}
+                  >
+                    <AddIcon />
+                  </Fab>
+                </Tooltip>
+              )}
             </Box>
             <DeviceCreateDialog
-            open={showCreateDialog}
-            onClose={() => setShowCreateDialog(false)}
-            onAdd={handleAddDevice}
-          />
+              open={showCreateDialog}
+              onClose={() => setShowCreateDialog(false)}
+              onAdd={handleAddDevice}
+            />
           </Box>
- 
+
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-[16px] text-gray-700">
               อุปกรณ์ทั้งหมด{" "}
@@ -319,48 +352,53 @@ const handleAddDevice = (newDevice) => {
               เครื่อง
             </h2>
 
-            {selectedRows.length > 0 && (
-              <Box
-                sx={{
-                  position: "absolute",
-                  right: 30,
-                  animation: "fadeIn 0.3s ease-in-out",
-                }}
-              >
-                <Button
-                  variant="contained"
-                  onClick={() => setShowMultipleDeleteDialog(true)}
-                  startIcon={<DeleteIcon />}
+            {userRole !== "iceuser" &&
+              userRole !== "rpuser" &&
+              selectedRows.length > 0 && (
+                <Box
                   sx={{
-                    backgroundColor: "#FF0048",
-                    "&:hover": {
-                      backgroundColor: "#D50000",
-                    },
-                    borderRadius: "8px",
-                    textTransform: "none",
-                    height: "36px",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    boxShadow: "none",
-                    px: 2,
+                    position: "absolute",
+                    right: 30,
+                    animation: "fadeIn 0.3s ease-in-out",
                   }}
                 >
-                  ลบข้อมูล ({selectedRows.length})
-                </Button>
-              </Box>
-            )}
+                  <Button
+                    variant="contained"
+                    onClick={() => setShowMultipleDeleteDialog(true)}
+                    startIcon={<DeleteIcon />}
+                    sx={{
+                      backgroundColor: "#FF0048",
+                      "&:hover": {
+                        backgroundColor: "#D50000",
+                      },
+                      borderRadius: "8px",
+                      textTransform: "none",
+                      height: "36px",
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      boxShadow: "none",
+                      px: 2,
+                    }}
+                  >
+                    ลบข้อมูล ({selectedRows.length})
+                  </Button>
+                </Box>
+              )}
           </div>
 
           <div className="bg-white rounded-xl shadow-lg overflow-hidden h-[calc(100vh-240px)]">
             <DataGrid
               rows={filteredRows}
-              columns={columns}
-              checkboxSelection
+              columns={getColumns()}
+              checkboxSelection={
+                userRole !== "iceuser" && userRole !== "rpuser"
+              }
               disableColumnResize
               rowSelectionModel={selectedRows}
               onRowSelectionModelChange={(selection) => {
                 setSelectedRows(selection);
               }}
+              hideFooter={true}
               sx={{
                 border: "none",
                 "& .MuiDataGrid-columnHeaders": {
@@ -540,50 +578,56 @@ const handleAddDevice = (newDevice) => {
           deviceData={deviceToEdit}
           onUpdate={handleUpdateDevice}
         />
- 
-<Dialog
- open={showAddSuccessDialog}
- onClose={() => setShowAddSuccessDialog(false)}
- sx={{
-   "& .MuiDialog-paper": {
-     borderRadius: "12px",
-     padding: "30px",
-     width: "450px",
-   },
- }}
->
- <DialogContent sx={{ textAlign: "center", py: 3 }}>
-   <CheckCircleIcon sx={{ fontSize: 64, color: "#4CAF50", mb: 2 }} />
-   <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: "#4CAF50" }}>
-     เพิ่มข้อมูลสำเร็จ
-   </Typography>
-   <Typography variant="body1" sx={{ color: "#666" }}>
-     ข้อมูลอุปกรณ์ใหม่ถูกเพิ่มเข้าสู่ระบบแล้ว
-   </Typography>
- </DialogContent>
-</Dialog>
 
-<Dialog
- open={showEditSuccessDialog}
- onClose={() => setShowEditSuccessDialog(false)}
- sx={{
-   "& .MuiDialog-paper": {
-     borderRadius: "12px",
-     padding: "30px", 
-     width: "450px",
-   },
- }}
->
- <DialogContent sx={{ textAlign: "center", py: 3 }}>
-   <CheckCircleIcon sx={{ fontSize: 64, color: "#4CAF50", mb: 2 }} />
-   <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: "#4CAF50" }}>
-     แก้ไขข้อมูลสำเร็จ
-   </Typography>
-   <Typography variant="body1" sx={{ color: "#666" }}>
-     ข้อมูลได้รับการอัพเดทเรียบร้อยแล้ว
-   </Typography>
- </DialogContent>
-</Dialog>
+        <Dialog
+          open={showAddSuccessDialog}
+          onClose={() => setShowAddSuccessDialog(false)}
+          sx={{
+            "& .MuiDialog-paper": {
+              borderRadius: "12px",
+              padding: "30px",
+              width: "450px",
+            },
+          }}
+        >
+          <DialogContent sx={{ textAlign: "center", py: 3 }}>
+            <CheckCircleIcon sx={{ fontSize: 64, color: "#4CAF50", mb: 2 }} />
+            <Typography
+              variant="h6"
+              sx={{ mb: 3, fontWeight: 600, color: "#4CAF50" }}
+            >
+              เพิ่มข้อมูลสำเร็จ
+            </Typography>
+            <Typography variant="body1" sx={{ color: "#666" }}>
+              ข้อมูลอุปกรณ์ใหม่ถูกเพิ่มเข้าสู่ระบบแล้ว
+            </Typography>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={showEditSuccessDialog}
+          onClose={() => setShowEditSuccessDialog(false)}
+          sx={{
+            "& .MuiDialog-paper": {
+              borderRadius: "12px",
+              padding: "30px",
+              width: "450px",
+            },
+          }}
+        >
+          <DialogContent sx={{ textAlign: "center", py: 3 }}>
+            <CheckCircleIcon sx={{ fontSize: 64, color: "#4CAF50", mb: 2 }} />
+            <Typography
+              variant="h6"
+              sx={{ mb: 3, fontWeight: 600, color: "#4CAF50" }}
+            >
+              แก้ไขข้อมูลสำเร็จ
+            </Typography>
+            <Typography variant="body1" sx={{ color: "#666" }}>
+              ข้อมูลได้รับการอัพเดทเรียบร้อยแล้ว
+            </Typography>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

@@ -86,51 +86,46 @@ export default function ReportPage() {
  }, [startDate, endDate]);
 
  const filterReportsByDate = () => {
-   if (!startDate || !endDate) {
-     setFilteredReports(mockReports);
-     return;
-   }
+  if (!startDate || !endDate) {
+    setFilteredReports(mockReports);
+    return;
+  }
 
-   const filtered = mockReports.filter((report) => {
-     const reportDate = dayjs(report.date, "DD/MM/YYYY");
-     return (
-       reportDate.isAfter(startDate.startOf('day')) && 
-       reportDate.isBefore(endDate.endOf('day'))
-     );
-   });
+  const filtered = mockReports.filter((report) => {
+    const reportDate = dayjs(report.date, "DD/MM/YYYY");
+    const start = startDate.startOf('day');
+    const end = endDate.endOf('day');
+    
+    return reportDate.unix() >= start.unix() && reportDate.unix() <= end.unix();
+  });
 
-   setFilteredReports(filtered);
- };
+  setFilteredReports(filtered);
+};
 
- const handleSearch = (query) => {
-   setSearchValue(query);
-   
-   let filtered = mockReports;
+const handleSearch = (query) => {
+  setSearchValue(query);
+  let filtered = mockReports;
 
-   // กรองตามวันที่
-   if (startDate && endDate) {
-     filtered = filtered.filter((report) => {
-       const reportDate = dayjs(report.date, "DD/MM/YYYY");
-       return (
-         reportDate.isAfter(startDate.startOf('day')) && 
-         reportDate.isBefore(endDate.endOf('day'))
-       );
-     });
-   }
+  if (startDate && endDate) {
+    filtered = filtered.filter((report) => {
+      const reportDate = dayjs(report.date, "DD/MM/YYYY");
+      const start = startDate.startOf('day');
+      const end = endDate.endOf('day');
+      
+      return reportDate.unix() >= start.unix() && reportDate.unix() <= end.unix();
+    });
+  }
 
-   // กรองตามคำค้นหา
-   if (query) {
-     filtered = filtered.filter((report) =>
-       Object.values(report).some(
-         (value) =>
-           value &&
-           value.toString().toLowerCase().includes(query.toLowerCase())
-       )
-     );
-   }
+  if (query) {
+    filtered = filtered.filter((report) =>
+      Object.values(report).some(
+        (value) => value && value.toString().toLowerCase().includes(query.toLowerCase())
+      )
+    );
+  }
 
-   setFilteredReports(filtered);
- };
+  setFilteredReports(filtered);
+};
 
  return (
    <div className="flex h-screen bg-[#F5F7FD]" suppressHydrationWarning>

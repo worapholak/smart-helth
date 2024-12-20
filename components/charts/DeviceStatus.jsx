@@ -112,14 +112,14 @@ export default function DeviceStatus({ timeRange = "วัน" }) {
          <Bar
            dataKey="active"
            name="เปิดใช้งาน"
-           fill="#00C853"
+           fill="#00EB4E"
            radius={[5, 5, 0, 0]}
            maxBarSize={35}
          />
          <Bar
            dataKey="inactive"
            name="ปิดใช้งาน"
-           fill="#FF0000"
+           fill="#FF0048"
            radius={[5, 5, 0, 0]}
            maxBarSize={35}
          />

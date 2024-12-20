@@ -27,7 +27,7 @@ const monthlyData = [
   { name: "เม.ย.", smartwatch: 8000, smartring: 6000 },
   { name: "พ.ค.", smartwatch: 9000, smartring: 7000 },
   { name: "มิ.ย.", smartwatch: 10000, smartring: 8000 },
-  {   name: 'ก.ค.', smartwatch: 5000, smartring: 3000 },
+  { name: "ก.ค.", smartwatch: 5000, smartring: 3000 },
   { name: "ส.ค.", smartwatch: 6000, smartring: 4000 },
   { name: "ก.ย.", smartwatch: 7000, smartring: 5000 },
   { name: "ต.ค.", smartwatch: 8000, smartring: 6000 },
@@ -80,7 +80,6 @@ export default function MemberDevices({ timeRange = "วัน" }) {
             fontSize={12}
             axisLine={false}
             tickLine={false}
-    
           />
           <YAxis
             ticks={yAxisTicks}
@@ -88,7 +87,6 @@ export default function MemberDevices({ timeRange = "วัน" }) {
             axisLine={false}
             tickLine={false}
             tickFormatter={(value) => value.toLocaleString()}
-
           />
           <Tooltip
             contentStyle={{

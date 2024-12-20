@@ -5,12 +5,28 @@ import HomeIcon from "@mui/icons-material/Home";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Avatar, IconButton, Tooltip } from "@mui/material";
 import { useRouter, usePathname } from "next/navigation";
-import { useLoadingStore } from '@/contexts/LoadingContext';
+import { useLoadingStore } from "@/contexts/LoadingContext";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const setIsLoading = useLoadingStore((state) => state.setIsLoading);
+  const [userData, setUserData] = useState({
+    name: "",
+    position: "",
+  });
+
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      const user = JSON.parse(currentUser);
+      setUserData({
+        name: user.name,
+        position: user.position,
+      });
+    }
+  }, []);
 
   const getWelcomeMessage = () => {
     switch (pathname) {
@@ -32,17 +48,17 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      // Add any logout logic here (e.g., clearing tokens, state, etc.)
-      await router.push('/');
+      localStorage.removeItem("currentUser");
+      await router.push("/");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="h-[70px] grid grid-cols-[0.22fr_1.7fr_0.5fr] items-center px-6 ">
+    <div className="grid grid-cols-[0.22fr_1.7fr_0.5fr] items-center px-6 h-[70px]">
       <div className="flex items-center gap-2">
         <Tooltip title="Back" arrow>
           <IconButton
@@ -114,19 +130,29 @@ export default function Navbar() {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 w-full pl-4">
-        <div className="flex-1 bg-white rounded-[12px] py-2 px-4 shadow-lg border border-gray-100 flex items-center gap-3 hover:border-gray-200 transition-all duration-200">
-          <Avatar
-            sx={{
-              width: 32,
-              height: 32,
-              fontSize: 14,
-              bgcolor: "#1a73e8",
-            }}
-          />
-          <span className="text-[14px] font-medium text-[#2c3e50]">
-            Admin Icesmart
-          </span>
+      <div className="flex items-center justify-end gap-3 w-full pl-4 ">
+        <div className="flex-1">
+          <div className="bg-white rounded-[10px] border border-gray-100 h-[48px] w-full shadow-lg flex items-center px-4">
+            <Avatar
+              sx={{
+                width: 28,
+                height: 28,
+                fontSize: 14,
+                bgcolor: "#1a73e8",
+                flexShrink: 0,
+              }}
+            >
+              {userData.name?.charAt(0)}
+            </Avatar>
+            <div className="flex flex-col min-w-0 ml-3">
+              <span className="text-[13px] font-medium text-[#2c3e50] truncate leading-tight">
+                {userData.name || "Guest"}
+              </span>
+              <span className="text-[11px] text-gray-500 truncate leading-tight">
+                {userData.position}
+              </span>
+            </div>
+          </div>
         </div>
 
         <Tooltip title="Logout" arrow>
@@ -135,8 +161,9 @@ export default function Navbar() {
             size="small"
             sx={{
               backgroundColor: "#FF4B4B",
-              width: 36,
-              height: 36,
+              width: 42,
+              height: 42,
+              flexShrink: 0,
               "&:hover": {
                 backgroundColor: "#FF3333",
                 transform: "translateY(-1px)",

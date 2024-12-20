@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
@@ -24,15 +24,14 @@ import EditLocationDialog from "@/components/EditLocationDialog";
 import OpenStreetMap from "@/components/OpenStreetMap";
 
 const calculateMapDimensions = () => ({
-  height: "calc(30vh)", // ปรับให้ map กินพื้นที่ 40% ของความสูงหน้าจอ
+  height: "calc(30vh)",
   minHeight: "300px",
 });
 
 export default function MapPage() {
   // States
   const [showLocationDialog, setShowLocationDialog] = useState(false);
-  const [showMultipleDeleteDialog, setShowMultipleDeleteDialog] =
-    useState(false);
+  const [showMultipleDeleteDialog, setShowMultipleDeleteDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditSuccessDialog, setShowEditSuccessDialog] = useState(false);
   const [showAddSuccessDialog, setShowAddSuccessDialog] = useState(false);
@@ -41,6 +40,16 @@ export default function MapPage() {
   const [locationToDelete, setLocationToDelete] = useState(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [locationToEdit, setLocationToEdit] = useState(null);
+  const [userRole, setUserRole] = useState('');
+  const [selectedDevices, setSelectedDevices] = useState([]);
+
+  useEffect(() => {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      const { role } = JSON.parse(currentUser);
+      setUserRole(role);
+    }
+  }, []);
 
   const [locations, setLocations] = useState([
     {
@@ -74,7 +83,6 @@ export default function MapPage() {
 
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [filteredLocations, setFilteredLocations] = useState(locations);
-
   const handleSearch = (query) => {
     if (!query) {
       setFilteredLocations(locations);
@@ -149,134 +157,139 @@ export default function MapPage() {
     setShowEditDialog(true);
   };
 
-  const [selectedDevices, setSelectedDevices] = useState([]); // เพิ่ม state นี้
+  const getColumns = () => {
+    const baseColumns = [
+      {
+        field: "id",
+        headerName: "รหัสประจำตัว",
+        width: 150,
+        flex: 1,
+        headerAlign: "center", 
+        align: "center",
+        renderCell: (params) => (
+          <Box sx={{ 
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            gap: 1
+          }}>
+            {params.value}
+            {params.row.isNew && (
+              <Box sx={{
+                width: "24px",
+                height: "24px", 
+                borderRadius: "50%",
+                bgcolor: "#FF0000",
+                color: "#FFFFFF",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "14px",
+                fontWeight: 600,
+                boxShadow: "0px 2px 4px rgba(255, 0, 0, 0.25)",
+                animation: "bounce 1s infinite",
+                "@keyframes bounce": {
+                  "0%": { transform: "translateY(0)" },
+                  "50%": { transform: "translateY(-10px)" },
+                  "100%": { transform: "translateY(0)" }
+                }
+              }}>
+                N
+              </Box>
+            )}
+          </Box>
+        )
+      },
+      {
+        field: "name",
+        headerName: "ชื่อสถานที่",
+        width: 150,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "type",
+        headerName: "ประเภท",
+        width: 120,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "phone",
+        headerName: "เบอร์ติดต่อ",
+        width: 120,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "email",
+        headerName: "อีเมล์",
+        width: 200,
+        flex: 1.5,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "address",
+        headerName: "ที่อยู่",
+        width: 250,
+        flex: 2,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "deviceCount",
+        headerName: "จำนวนอุปกรณ์",
+        width: 120,
+        flex: 1,
+        headerAlign: "center",
+        align: "center",
+        renderCell: (params) => params.row.deviceCount,
+      },
+    ];
 
-  const columns = [
-    {
-      field: "id",
-      headerName: "รหัสประจำตัว",
-      width: 150,
-      flex: 1,
-      headerAlign: "center", 
-      align: "center",
-      renderCell: (params) => (
-        <Box sx={{ 
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          gap: 1
-        }}>
-          {params.value}
-          {params.row.isNew && (
-            <Box sx={{
-              width: "24px",
-              height: "24px", 
-              borderRadius: "50%",
-              bgcolor: "#FF0000",
-              color: "#FFFFFF",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "14px",
-              fontWeight: 600,
-              boxShadow: "0px 2px 4px rgba(255, 0, 0, 0.25)",
-              animation: "bounce 1s infinite",
-              "@keyframes bounce": {
-                "0%": { transform: "translateY(0)" },
-                "50%": { transform: "translateY(-10px)" },
-                "100%": { transform: "translateY(0)" }
-              }
-            }}>
-              N
-            </Box>
-          )}
-        </Box>
-      )
-     },
-    {
-      field: "name",
-      headerName: "ชื่อสถานที่",
-      width: 150,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "type",
-      headerName: "ประเภท",
-      width: 120,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "phone",
-      headerName: "เบอร์ติดต่อ",
-      width: 120,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "email",
-      headerName: "อีเมล์",
-      width: 200,
-      flex: 1.5,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "address",
-      headerName: "ที่อยู่",
-      width: 250,
-      flex: 2,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "deviceCount",
-      headerName: "จำนวนอุปกรณ์",
-      width: 120,
-      flex: 1,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => params.row.deviceCount, // แก้ไขให้แสดงค่าจาก row
-    },
-    {
-      field: "actions",
-      headerName: "",
-      width: 120,
-      sortable: false,
-      flex: 0.7,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => (
-        <>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEditLocation(params.row);
-            }}
-          >
-            <EditIcon sx={{ fontSize: 20, color: "#2196F3" }} />
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLocationToDelete(params.row);
-              setShowDeleteDialog(true);
-            }}
-          >
-            <DeleteIcon sx={{ fontSize: 20, color: "#F44336" }} />
-          </IconButton>
-        </>
-      ),
-    },
-  ];
+    const adminColumns = [
+      ...baseColumns,
+      {
+        field: "actions",
+        headerName: "",
+        width: 120,
+        sortable: false,
+        flex: 0.7,
+        headerAlign: "center",
+        align: "center",
+        renderCell: (params) => (
+          <>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditLocation(params.row);
+              }}
+            >
+              <EditIcon sx={{ fontSize: 20, color: "#2196F3" }} />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLocationToDelete(params.row);
+                setShowDeleteDialog(true);
+              }}
+            >
+              <DeleteIcon sx={{ fontSize: 20, color: "#F44336" }} />
+            </IconButton>
+          </>
+        ),
+      },
+    ];
 
+    return userRole !== 'iceuser' && userRole !== 'rpuser' ? adminColumns : baseColumns;
+  };
   return (
     <div className="flex h-screen bg-[#F5F7FD]">
       <Sidebar />
@@ -302,6 +315,7 @@ export default function MapPage() {
             <Box sx={{ flex: 1 }}>
               <SearchBar onSearch={handleSearch} />
             </Box>
+            {userRole !== 'iceuser' && userRole !== 'rpuser' && (
             <Tooltip title="เพิ่มสถานที่" arrow>
               <Fab
                 color="primary"
@@ -316,6 +330,7 @@ export default function MapPage() {
                 <AddIcon />
               </Fab>
             </Tooltip>
+            )}
           </Box>
 
           <Box sx={{ position: "relative", height: "40px", mb: 1 }}>
@@ -335,7 +350,7 @@ export default function MapPage() {
               แห่ง
             </Typography>
 
-            {selectedLocations.length > 0 && (
+            {userRole !== 'iceuser' && userRole !== 'rpuser' && selectedLocations.length > 0 && (
               <Box
                 sx={{
                   position: "absolute",
@@ -364,24 +379,25 @@ export default function MapPage() {
           <div
             className="bg-white rounded-xl shadow-lg overflow-hidden"
             style={{
-              height: `calc(100vh - ${
-                calculateMapDimensions().height
-              } - 220px)`, // ปรับค่าให้พอดี
+              height: `calc(100vh - ${calculateMapDimensions().height} - 220px)`,
             }}
           >
             <DataGrid
               rows={filteredLocations}
-              columns={columns}
-              checkboxSelection
+              columns={getColumns()}
+              checkboxSelection={userRole !== 'iceuser' && userRole !== 'rpuser'}
               disableColumnResize
               rowSelectionModel={selectedLocations}
               onRowSelectionModelChange={(selection) => {
-                setSelectedLocations(selection);
+                if (userRole !== 'iceuser' && userRole !== 'rpuser') {
+                  setSelectedLocations(selection);
+                }
               }}
-              autoHeight={false} // เพิ่มตัวนี้เพื่อให้ความสูงคงที่
+              autoHeight={false}
+              hideFooter={true}
               sx={{
                 border: "none",
-                height: "100%", // ให้เต็มความสูง container
+                height: "100%",
                 "& .MuiDataGrid-columnHeaders": {
                   backgroundColor: "#f8f9fa",
                 },
@@ -419,8 +435,7 @@ export default function MapPage() {
                 ยืนยันการลบ ?
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                คุณต้องการลบข้อมูลที่เลือกจำนวน {selectedLocations.length}{" "}
-                รายการ
+                คุณต้องการลบข้อมูลที่เลือกจำนวน {selectedLocations.length} รายการ
               </Typography>
               <DialogActions sx={{ justifyContent: "center", gap: 2 }}>
                 <Button

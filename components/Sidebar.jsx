@@ -8,21 +8,61 @@ import PeopleIcon from "@mui/icons-material/People";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import WatchIcon from "@mui/icons-material/Watch";
 import DescriptionIcon from "@mui/icons-material/Description";
+
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import VaccinesIcon from "@mui/icons-material/Vaccines";
 import { useLoadingStore } from "@/contexts/LoadingContext";
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const [activeLink, setActiveLink] = useState(pathname);
+  const [userRole, setUserRole] = useState("");
   const setIsLoading = useLoadingStore((state) => state.setIsLoading);
 
-  const links = [
-    { href: "/dashboard", icon: <DashboardIcon />, label: "Dashboard" },
-    { href: "/user-management", icon: <PeopleIcon />, label: "Admin and user" },
-    { href: "/map", icon: <LocationOnIcon />, label: "Map" },
-    { href: "/device", icon: <WatchIcon />, label: "Device" },
-    { href: "/report", icon: <DescriptionIcon />, label: "Report" },
-  ];
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      const { role } = JSON.parse(currentUser);
+      setUserRole(role);
+    }
+  }, []);
+
+  const getLinks = () => {
+    const baseLinks = [
+      { href: "/dashboard", icon: <DashboardIcon />, label: "Dashboard" },
+    ];
+
+    const iceLinks = [
+      {
+        href: "/user-management",
+        icon: <PeopleIcon />,
+        label: "Admin and user",
+      },
+      { href: "/map", icon: <LocationOnIcon />, label: "Map" },
+      { href: "/device", icon: <WatchIcon />, label: "Device" },
+      { href: "/report", icon: <DescriptionIcon />, label: "Report" },
+    ];
+
+    const hospitalLinks = [
+      {
+        href: "/user-management",
+        icon: <PeopleIcon />,
+        label: "Admin and user",
+      },
+      { href: "/patient", icon: <VaccinesIcon />, label: "Patient" },
+      { href: "/department", icon: <AccountTreeIcon />, label: "Department" },
+      { href: "/device", icon: <WatchIcon />, label: "Device" },
+      { href: "/report", icon: <DescriptionIcon />, label: "Report" },
+    ];
+
+    if (userRole === "iceadmin" || userRole === "iceuser") {
+      return [...baseLinks, ...iceLinks];
+    } else if (userRole === "rpadmin" || userRole === "rpuser") {
+      return [...baseLinks, ...hospitalLinks];
+    }
+    return baseLinks;
+  };
 
   const handleLoad = useCallback(() => {
     setIsLoading(false);
@@ -32,10 +72,8 @@ export default function Sidebar() {
     setActiveLink(pathname);
     setIsLoading(false);
 
-    // เมื่อหน้าโหลดเสร็จ
     window.addEventListener("load", handleLoad);
 
-    // ตรวจสอบว่าถ้าหน้าโหลดเสร็จแล้ว
     if (document.readyState === "complete") {
       handleLoad();
     }
@@ -63,7 +101,7 @@ export default function Sidebar() {
     <div className="w-[250px] h-screen bg-[#F5F7FD] py-[20px] flex items-center justify-center">
       <div className="w-[90%] h-[calc(100vh-10px)] bg-[#FFFFFF] shadow-lg py-[17px] rounded-[10px]">
         <div className="h-[55px] bg-blue-600 mx-4 mb-[40px] rounded-[10px]" />
-        {links.map(({ href, icon, label }) => {
+        {getLinks().map(({ href, icon, label }) => {
           const isActive = activeLink === href;
           return (
             <ListItemButton
