@@ -1,11 +1,10 @@
 "use client";
 
-import { Suspense } from 'react';
 import { Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import LoadingSpinner from '@/components/LoadingSpinner';
-import { LoadingProvider } from '@/contexts/LoadingContext';
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { LoadingProvider } from "@/contexts/LoadingContext";
 
 const notoSansThai = Noto_Sans_Thai({
   subsets: ["thai"],
@@ -41,9 +40,7 @@ export default function RootLayout({ children }) {
         <LoadingProvider>
           <ThemeWrapper>
             <LoadingSpinner />
-            <div id="root-content">
-              {children}
-            </div>
+            <div id="root-content">{children}</div>
           </ThemeWrapper>
         </LoadingProvider>
       </body>

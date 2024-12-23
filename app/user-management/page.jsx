@@ -29,6 +29,14 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 
 export default function UserManagement() {
   const [userRole, setUserRole] = useState("");
+
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      const { role } = JSON.parse(currentUser);
+      setUserRole(role);
+    }
+  }, []);
   const [rows, setRows] = useState([
     {
       id: "130666282085",
@@ -84,41 +92,6 @@ export default function UserManagement() {
     },
   ]);
 
-  const [filteredRows, setFilteredRows] = useState(rows);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deletedCount, setDeletedCount] = useState(0);
-  const [showSummaryDialog, setShowSummaryDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showEditSuccessDialog, setShowEditSuccessDialog] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [userToEdit, setUserToEdit] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [showAddUserDialog, setShowAddUserDialog] = useState(false);
-  const [userType, setUserType] = useState("");
-  const [showAddSuccessDialog, setShowAddSuccessDialog] = useState(false);
-  const [showMultipleDeleteDialog, setShowMultipleDeleteDialog] =
-    useState(false);
-
-  useEffect(() => {
-    const currentUser = localStorage.getItem("currentUser");
-    if (currentUser) {
-      const { role } = JSON.parse(currentUser);
-      setUserRole(role);
-    }
-  }, []);
-  // Cleanup timeout on component unmount or re-render
-  useEffect(() => {
-    let timeoutId;
-    if (showAddSuccessDialog) {
-      timeoutId = setTimeout(() => {
-        setShowAddSuccessDialog(false);
-      }, 3000);
-    }
-    // cleanup function
-    return () => clearTimeout(timeoutId);
-  }, [showAddSuccessDialog]);
-
   const handleAddUser = (newUser) => {
     // ลบ isNew จากผู้ใช้เก่าทั้งหมดและเพิ่ม isNew ให้ผู้ใช้ใหม่
     const resetNewFlags = (prevRows) =>
@@ -141,7 +114,32 @@ export default function UserManagement() {
 
   const handleAddSuccess = () => {
     setShowAddSuccessDialog(true);
+  
+    // Store timeout ID for cleanup
+    const timeoutId = setTimeout(() => {
+      setShowAddSuccessDialog(false);
+    }, 3000);
+  
+    // Cleanup timeout on component unmount or re-render
+    useEffect(() => {
+      return () => clearTimeout(timeoutId);
+    }, []);
   };
+
+  const [filteredRows, setFilteredRows] = useState(rows);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletedCount, setDeletedCount] = useState(0);
+  const [showSummaryDialog, setShowSummaryDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showEditSuccessDialog, setShowEditSuccessDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [userToEdit, setUserToEdit] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [showAddUserDialog, setShowAddUserDialog] = useState(false);
+  const [userType, setUserType] = useState("");
+  const [showAddSuccessDialog, setShowAddSuccessDialog] = useState(false);
+  const [showMultipleDeleteDialog, setShowMultipleDeleteDialog] = useState(false);
 
   const handleSearch = (query) => {
     try {
@@ -149,17 +147,18 @@ export default function UserManagement() {
         setFilteredRows(rows);
         return;
       }
-
+      
       const lowercaseQuery = query.toLowerCase();
-      const filtered = rows.filter((row) =>
-        Object.values(row).some((value) =>
-          String(value).toLowerCase().includes(lowercaseQuery)
-        )
+      const filtered = rows.filter(row => 
+        Object.values(row)
+          .some(value => 
+            String(value).toLowerCase().includes(lowercaseQuery)
+          )
       );
-
+      
       setFilteredRows(filtered);
     } catch (error) {
-      console.error("Search error:", error);
+      console.error('Search error:', error);
       setFilteredRows(rows); // Fallback to showing all rows on error
     }
   };
@@ -167,27 +166,20 @@ export default function UserManagement() {
   const handleUpdateUser = (userId, updatedData, updatedPermissions) => {
     setRows((prevRows) => {
       const updatedRows = prevRows.map((row) => {
+        // ลบ isNew flag เมื่อมีการแก้ไขข้อมูล
         if (row.id === userId) {
-          return {
+          const validatedData = {
             ...row,
-            name: updatedData.name,
-            phone: updatedData.phone.replace(/[^0-9]/g, ""),
+            ...updatedData,
             email: updatedData.email.toLowerCase().trim(),
-            permissions: {
-              viewData: updatedPermissions.viewData,
-              controlSystem: updatedPermissions.controlSystem,
-              editUserData: updatedPermissions.editUserData,
-              viewPatient: updatedPermissions.viewPatient, // เพิ่มส่วนนี้
-            },
-            deviceCount: updatedData.deviceCount,
+            phone: updatedData.phone.replace(/[^0-9]/g, ""),
+            permissions: updatedPermissions,
             isNew: false,
           };
+          return validatedData;
         }
         return row;
       });
-
-      // อัพเดต filteredRows ด้วย
-      setFilteredRows(updatedRows);
       return updatedRows;
     });
 
@@ -341,10 +333,10 @@ export default function UserManagement() {
         headerAlign: "center",
         align: "center",
       },
-      {
+        {
         field: "actions",
-        headerName: "การดำเนินการ",
-        width: 400, // เพิ่มความกว้างเล็กน้อย
+        headerName: "การดำเนินการ", 
+        width: 300,
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
@@ -353,14 +345,19 @@ export default function UserManagement() {
         align: "center",
         renderCell: (params) => {
           return (
-            <div
-              className="flex gap-1 justify-center items-center h-full overflow-hidden cursor-pointer"
-              style={{
-                minWidth: "max-content",
-
-                transition: "transform 0.3s ease-in-out",
-              }}
-            >
+            <div 
+            className="flex gap-2 justify-center items-center h-full overflow-hidden cursor-pointer" 
+            style={{ 
+              minWidth: 'max-content',
+              transition: "transform 0.3s ease-in-out"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateX(-0px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateX(0)";
+            }}
+          >
               {params.row.permissions?.viewData && (
                 <Button
                   variant="contained"
@@ -368,12 +365,10 @@ export default function UserManagement() {
                   sx={{
                     color: "#494949",
                     backgroundColor: "#C8FDCB",
-                    borderRadius: "15px", // ลดขนาดความโค้งลง
+                    borderRadius: "20px",
                     textTransform: "none",
-                    fontSize: "12px", // ลดขนาดตัวอักษร
-                    padding: "4px 8px", // ลดขนาด padding
-                    minWidth: "auto", // ให้ปุ่มมีขนาดตามเนื้อหา
-                    height: "24px", // กำหนดความสูงให้เล็กลง
+                    fontSize: "13px",
+                  
                   }}
                 >
                   ดูข้อมูล
@@ -386,14 +381,12 @@ export default function UserManagement() {
                       variant="contained"
                       size="small"
                       sx={{
-                        backgroundColor: "#D1EAFF",
+                        backgroundColor: "#D1EAFF", 
                         color: "#494949",
-                        borderRadius: "15px",
+                        borderRadius: "20px",
                         textTransform: "none",
-                        fontSize: "12px",
-                        padding: "4px 8px",
-                        minWidth: "auto",
-                        height: "24px",
+                        fontSize: "13px",
+                      
                       }}
                     >
                       ควบคุมระบบ
@@ -405,16 +398,14 @@ export default function UserManagement() {
                       size="small"
                       sx={{
                         backgroundColor: "#FFD1EE",
-                        color: "#494949",
-                        borderRadius: "15px",
+                        color: "#494949", 
+                        borderRadius: "20px",
                         textTransform: "none",
-                        fontSize: "12px",
-                        padding: "4px 8px",
-                        minWidth: "auto",
-                        height: "24px",
+                        fontSize: "13px",
+                        
                       }}
                     >
-                      แก้ไขข้อมูล
+                      แก้ไขข้อมูลผู้ใช้งาน
                     </Button>
                   )}
                   {params.row.permissions?.viewPatient && (
@@ -424,12 +415,10 @@ export default function UserManagement() {
                       sx={{
                         backgroundColor: "#FFE4C4",
                         color: "#494949",
-                        borderRadius: "15px",
+                        borderRadius: "20px", 
                         textTransform: "none",
-                        fontSize: "12px",
-                        padding: "4px 8px",
-                        minWidth: "auto",
-                        height: "24px",
+                        fontSize: "13px",
+                      
                       }}
                     >
                       ดูข้อมูลผู้ป่วย

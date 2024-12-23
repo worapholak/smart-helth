@@ -102,7 +102,8 @@ export default function Sidebar() {
       <div className="w-[90%] h-[calc(100vh-10px)] bg-[#FFFFFF] shadow-lg py-[17px] rounded-[10px]">
         <div className="h-[55px] bg-blue-600 mx-4 mb-[40px] rounded-[10px]" />
         {getLinks().map(({ href, icon, label }) => {
-          const isActive = activeLink === href;
+                  const isActive = activeLink === href || (href === "/patient" && activeLink.startsWith("/patient/"));
+
           return (
             <ListItemButton
               key={href}
