@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect,useRef  } from "react";
 import { styled } from "@mui/material/styles";
 import EditUserDialog from "@/components/EditUserDialog";
 import Sidebar from "@/components/Sidebar";
@@ -112,29 +112,23 @@ export default function UserManagement() {
     handleAddSuccess();
   };
 
+  const timerRef = useRef(null);
+
   const handleAddSuccess = () => {
     setShowAddSuccessDialog(true);
-
-    // Clear any existing timeout before setting a new one
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-
-    // Set a new timeout and store its ID
-    const newTimeoutId = setTimeout(() => {
+  
+    timerRef.current = setTimeout(() => {
       setShowAddSuccessDialog(false);
     }, 3000);
-    setTimeoutId(newTimeoutId);
   };
-
-  // Cleanup timeout on component unmount
+  
   useEffect(() => {
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
       }
     };
-  }, [timeoutId]);
+  }, [timerRef]);
 
   const [filteredRows, setFilteredRows] = useState(rows);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -150,7 +144,6 @@ export default function UserManagement() {
   const [userType, setUserType] = useState("");
   const [showAddSuccessDialog, setShowAddSuccessDialog] = useState(false);
   const [showMultipleDeleteDialog, setShowMultipleDeleteDialog] = useState(false);
-  const [timeoutId, setTimeoutId] = useState(null);
 
   const handleSearch = (query) => {
     try {
