@@ -114,17 +114,27 @@ export default function UserManagement() {
 
   const handleAddSuccess = () => {
     setShowAddSuccessDialog(true);
-  
-    // Store timeout ID for cleanup
-    const timeoutId = setTimeout(() => {
+
+    // Clear any existing timeout before setting a new one
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    // Set a new timeout and store its ID
+    const newTimeoutId = setTimeout(() => {
       setShowAddSuccessDialog(false);
     }, 3000);
-  
-    // Cleanup timeout on component unmount or re-render
-    useEffect(() => {
-      return () => clearTimeout(timeoutId);
-    }, []);
+    setTimeoutId(newTimeoutId);
   };
+
+  // Cleanup timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [timeoutId]);
 
   const [filteredRows, setFilteredRows] = useState(rows);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -140,6 +150,7 @@ export default function UserManagement() {
   const [userType, setUserType] = useState("");
   const [showAddSuccessDialog, setShowAddSuccessDialog] = useState(false);
   const [showMultipleDeleteDialog, setShowMultipleDeleteDialog] = useState(false);
+  const [timeoutId, setTimeoutId] = useState(null);
 
   const handleSearch = (query) => {
     try {
