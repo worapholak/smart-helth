@@ -559,7 +559,7 @@ export default function MapPage() {
                 ลบข้อมูลสำเร็จ
               </Typography>
               <Typography variant="body1" sx={{ color: "#666" }}>
-                {deletedCount > 1
+                {deletedCount > 0
                   ? `รายการ ${deletedCount} รายการ ถูกลบออกจากระบบแล้ว`
                   : `รายการ ${locationToDelete?.name} ถูกลบออกจากระบบแล้ว`}
               </Typography>

@@ -90,8 +90,8 @@ export default function BodyTemperaturePage({ params }) {
               </Card>
 
               {/* Stats Cards */}
-              <Card sx={{
-                borderRadius: 2,
+              <Box sx={{
+          
                 backgroundColor: "transparent",
                 height: "100%",
                 display: "flex",
@@ -101,7 +101,7 @@ export default function BodyTemperaturePage({ params }) {
                   {/* Maximum Temperature Card */}
                   <Card sx={{
                     ...commonCardStyle,
-                    p: 7,
+                    p: 6,
                     background: 'linear-gradient(135deg, #FFF 0%, #FFF1F4 100%)',
                     transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
             
@@ -293,7 +293,7 @@ export default function BodyTemperaturePage({ params }) {
                     </Box>
                   </Card>
                 </div>
-              </Card>
+              </Box>
             </div>
 
             {/* Side Cards */}

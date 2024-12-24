@@ -29,6 +29,15 @@ import EditPatientDialog from "@/components/EditPatientDialog";
 import dayjs from "dayjs";
 
 export default function Patient() {
+  const [userRole, setUserRole] = useState("");
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      const { role } = JSON.parse(currentUser);
+      setUserRole(role);
+    }
+  }, []);
+
   const setIsLoading = useLoadingStore((state) => state.setIsLoading);
   const [openEditPatientDialog, setOpenEditPatientDialog] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -162,7 +171,7 @@ export default function Patient() {
   };
 
   const getColumns = () => {
-    return [
+    const baseColumns = [
       {
         field: "id",
         headerName: "เลขประจำตัวผู้ป่วย",
@@ -227,14 +236,16 @@ export default function Patient() {
         headerAlign: "center",
         align: "center",
       },
+    ];
+
+    const adminColumns = [
+      ...baseColumns,
       {
         field: "actions",
         headerName: "",
         width: 120,
         sortable: false,
-        filterable: false,
-        disableColumnMenu: true,
-        flex: 0.5,
+        flex: 0.7,
         headerAlign: "center",
         align: "center",
         renderCell: (params) => (
@@ -243,15 +254,15 @@ export default function Patient() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: "100%", // เพิ่ม width: "100%"
-              height: "100%", // เพิ่ม height: "100%"
-              gap: 1, // เพิ่มระยะห่างระหว่างปุ่ม
+              width: "100%",
+              height: "100%",
+              gap: 1,
             }}
           >
             <IconButton size="small">
               <EditIcon
-               onClick={(e) => {
-                e.stopPropagation();
+                onClick={(e) => {
+                  e.stopPropagation();
                   setSelectedPatient(params.row);
                   setOpenEditPatientDialog(true);
                 }}
@@ -272,6 +283,8 @@ export default function Patient() {
         ),
       },
     ];
+
+    return userRole === "rpadmin" ? adminColumns : baseColumns;
   };
 
   const handleRowClick = async (params) => {
@@ -302,7 +315,7 @@ export default function Patient() {
             <Box sx={{ flexGrow: 1 }}>
               <SearchBar onSearch={handleSearch} />
             </Box>
-
+            {userRole === "rpadmin" && (
             <Box sx={{ display: "flex", gap: 2, ml: 1 }}>
               <>
                 {/* Existing JSX */}
@@ -346,6 +359,7 @@ export default function Patient() {
                 </Fab>
               </Tooltip>
             </Box>
+            )}
             <AddPatientDialog
               open={openAddDialog}
               onClose={() => setOpenAddDialog(false)}
@@ -414,7 +428,7 @@ export default function Patient() {
                 },
               }}
               pageSizeOptions={[10]}
-              checkboxSelection
+              checkboxSelection={userRole === "rpadmin"}
               disableRowSelectionOnClick
               rowSelectionModel={selectedRows}
               onRowSelectionModelChange={(newSelection) => {

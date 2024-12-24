@@ -1,5 +1,5 @@
 "use client";
-import { useState , useEffect } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
@@ -564,7 +564,7 @@ export default function DevicePage() {
                 ลบข้อมูลสำเร็จ
               </Typography>
               <Typography variant="body1" sx={{ color: "#666" }}>
-                {deletedCount > 1
+                {deletedCount > 0
                   ? `รายการ ${deletedCount} รายการ ถูกลบออกจากระบบแล้ว`
                   : `รายการ ${deviceToDelete?.deviceId} ถูกลบออกจากระบบแล้ว`}
               </Typography>

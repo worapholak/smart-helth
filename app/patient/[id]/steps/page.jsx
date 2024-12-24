@@ -53,9 +53,9 @@ export default function StepsPage({ params }) {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div className="flex h-screen bg-[#F5F7FD]">
         <Sidebar />
-        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden ">
           <Navbar />
-          <div className="flex-1 grid grid-cols-[1fr_0.15fr_0.29fr] gap-4 p-4 overflow-hidden">
+          <div className="flex-1 grid grid-cols-[1fr_0.15fr_0.29fr] gap-4 p-4 overflow-hidden ">
             <div className="flex-1 grid grid-rows-[1.1fr_1fr] gap-4 overflow-hidden">
               {/* Chart Card */}
               <Card
@@ -93,10 +93,10 @@ export default function StepsPage({ params }) {
               </Card>
 
               {/* Stats Cards */}
-              <Card
+              <Box
                 sx={{
                   borderRadius: 2,
-                  backgroundColor: "transparent",
+
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
@@ -107,7 +107,8 @@ export default function StepsPage({ params }) {
                   <Card
                     sx={{
                       ...commonCardStyle,
-                      p: 7,
+                      p: 4,
+                      mb: 4,
                       background:
                         "linear-gradient(135deg, #FFF 0%, #FFF8EF 100%)",
                       transition: "transform 0.2s ease-in-out",
@@ -334,7 +335,7 @@ export default function StepsPage({ params }) {
                     </Box>
                   </Card>
                 </div>
-              </Card>
+              </Box>
             </div>
 
             {/* Side Cards */}

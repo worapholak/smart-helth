@@ -899,7 +899,7 @@ export default function UserManagement() {
                 ลบข้อมูลสำเร็จ
               </Typography>
               <Typography variant="body1" sx={{ color: "#666" }}>
-                {deletedCount > 1
+                {deletedCount >= 0
                   ? `รายชื่อ ${deletedCount} รายการ ถูกลบออกจากระบบแล้ว`
                   : `รายชื่อ ${userToDelete?.name} ถูกลบออกจากระบบแล้ว`}
               </Typography>

@@ -94,9 +94,8 @@ export default function BloodGlucosePage({ params }) {
               </Card>
 
               {/* Stats Cards */}
-              <Card
+              <Box
                 sx={{
-                  borderRadius: 2,
                   backgroundColor: "transparent",
                   height: "100%",
                   display: "flex",
@@ -347,7 +346,7 @@ export default function BloodGlucosePage({ params }) {
                     </Box>
                   </Card>
                 </div>
-              </Card>
+              </Box>
             </div>
 
             <Card sx={{ ...commonCardStyle, "& > *": { flex: "0 0 auto" } }}>
