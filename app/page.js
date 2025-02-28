@@ -1,66 +1,66 @@
-'use client';
+"use client";
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { Container as MuiContainer } from '@mui/material';
+import { Container as MuiContainer } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { IconButton, InputAdornment } from "@mui/material";
 import { CircularProgress } from "@mui/material";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 const styles = {
   textField: {
-    '& .MuiOutlinedInput-root': {
-      color: '#494949',
-      backgroundColor: '#F0F9FF',
-      borderRadius: '12px',
-      height: '56px',
-      padding: '0 20px',
-      '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#2762F8',
+    "& .MuiOutlinedInput-root": {
+      color: "#494949",
+      backgroundColor: "#F0F9FF",
+      borderRadius: "12px",
+      height: "56px",
+      padding: "0 20px",
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#2762F8",
       },
     },
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'transparent',
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "transparent",
     },
-    '& .MuiInputBase-input::placeholder': {
-      color: '#9CA3AF',
+    "& .MuiInputBase-input::placeholder": {
+      color: "#9CA3AF",
       opacity: 1,
     },
-    '&.Mui-error .MuiOutlinedInput-root': {
-      backgroundColor: '#FFF5F5',
-      '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#FF4D4D',
+    "&.Mui-error .MuiOutlinedInput-root": {
+      backgroundColor: "#FFF5F5",
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#FF4D4D",
       },
     },
-    '& .MuiFormHelperText-root': {
-      backgroundColor: 'transparent',
-      margin: '8px 0 0 0',
-      fontSize: '14px',
-      color: '#FF4D4D',
+    "& .MuiFormHelperText-root": {
+      backgroundColor: "transparent",
+      margin: "8px 0 0 0",
+      fontSize: "14px",
+      color: "#FF4D4D",
       fontWeight: 500,
-      display: 'flex',
-      alignItems: 'center',
-      '&.Mui-error': {
-        color: '#FF4D4D',
+      display: "flex",
+      alignItems: "center",
+      "&.Mui-error": {
+        color: "#FF4D4D",
       },
-    }
+    },
   },
   loginButton: {
-    backgroundColor: '#2762F8',
-    height: '56px',
-    borderRadius: '12px',
-    fontSize: '16px',
+    backgroundColor: "#2762F8",
+    height: "56px",
+    borderRadius: "12px",
+    fontSize: "16px",
     fontWeight: 600,
-    textTransform: 'none',
-    '&:hover': {
-      backgroundColor: '#1e4fd6',
+    textTransform: "none",
+    "&:hover": {
+      backgroundColor: "#1e4fd6",
     },
-    '&.Mui-disabled': {
-      backgroundColor: '#2762F8', 
-      color: '#ffffff'
+    "&.Mui-disabled": {
+      backgroundColor: "#2762F8",
+      color: "#ffffff",
     },
-  }
+  },
 };
 
 // เพิ่ม CSS Animation
@@ -78,86 +78,99 @@ const keyframes = `
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const router = useRouter();
 
   const validateForm = () => {
     const newErrors = {};
-    if (!email) newErrors.email = 'Email is required';
-    if (!password) newErrors.password = 'Password is required';
+    if (!email) newErrors.email = "Email is required";
+    if (!password) newErrors.password = "Password is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const userData = [
     {
-      email: 'iceadmin@example.com',
-      password: 'admin123',
-      role: 'iceadmin',
-      name: 'John Smith',
-      position: 'Ice System Administrator'
+      email: "iceadmin@example.com",
+      password: "admin123",
+      role: "iceadmin",
+      name: "John Smith",
+      position: "Ice System Administrator",
     },
     {
-      email: 'iceuser@example.com',
-      password: 'user123',
-      role: 'iceuser',
-      name: 'Sarah Johnson',
-      position: 'Ice System User'
+      email: "iceuser@example.com",
+      password: "user123",
+      role: "iceuser",
+      name: "Sarah Johnson",
+      position: "Ice System User",
     },
     {
-      email: 'hospitaladmin@example.com',
-      password: 'admin123',
-      role: 'rpadmin',
-      name: 'Michael Chen',
-      position: 'Hospital Administrator'
+      email: "hospitaladmin@example.com",
+      password: "admin123",
+      role: "rpadmin",
+      name: "Michael Chen",
+      position: "Hospital Administrator",
     },
     {
-      email: 'hospitaluser@example.com',
-      password: 'user123',
-      role: 'rpuser',
-      name: 'Emily Brown',
-      position: 'Hospital Staff'
-    }
+      email: "hospitaluser@example.com",
+      password: "user123",
+      role: "rpuser",
+      name: "Emily Brown",
+      position: "Hospital Staff",
+    },
+    {
+      email: "patient@example.com",
+      password: "patient123",
+      role: "patient",
+      id: "130666282085",
+      name: "David Wilson",
+      position: "Patient",
+    },
   ];
 
   const handleLogin = async () => {
     if (!validateForm()) return;
-      
+
     try {
       setLoading(true);
-      
+
       const user = userData.find(
-        user => user.email === email && user.password === password
+        (user) => user.email === email && user.password === password
       );
-  
+
       if (user) {
-        // จำลองการเก็บข้อมูลผู้ใช้ใน localStorage หรือ state management system
-        localStorage.setItem('currentUser', JSON.stringify({
-          name: user.name,
-          role: user.role,
-          position: user.position,
-          email: user.email
-        }));
-        
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        router.push('/dashboard');
+        localStorage.setItem(
+          "currentUser",
+          JSON.stringify({
+            name: user.name,
+            role: user.role,
+            position: user.position,
+            email: user.email,
+            id: user.id || "", // เพิ่ม id เข้าไปด้วย
+          })
+        );
+
+        // ไม่ต้องใส่ setLoading(false) ใน finally แล้ว
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        router.push("/dashboard");
       } else {
+        setLoading(false); // set loading เป็น false เฉพาะกรณี login ไม่สำเร็จ
         setErrors({
-          email: 'Invalid credentials. Please check your email and password.',
-          password: 'Invalid credentials. Please check your email and password.'
+          email: "Invalid credentials. Please check your email and password.",
+          password:
+            "Invalid credentials. Please check your email and password.",
         });
-        const form = document.querySelector('form');
-        form?.classList.add('shake');
+        const form = document.querySelector("form");
+        form?.classList.add("shake");
         setTimeout(() => {
-          form?.classList.remove('shake');
+          form?.classList.remove("shake");
         }, 500);
       }
     } catch (error) {
-      console.error('Login error:', error);
-    } finally {
       setLoading(false);
+      console.error("Login error:", error);
     }
   };
 
@@ -198,10 +211,12 @@ export default function LoginPage() {
               Log In
             </Typography>
 
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleLogin();
-            }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleLogin();
+              }}
+            >
               <div className="flex flex-col gap-2">
                 <Typography className="text-white/90 font-medium text-[15px] ml-1">
                   Email
@@ -272,9 +287,13 @@ export default function LoginPage() {
                 fullWidth
                 onClick={handleLogin}
                 disabled={loading}
-                sx={{...styles.loginButton, marginTop: '2rem'}}
+                sx={{ ...styles.loginButton, marginTop: "2rem" }}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Login"
+                )}
               </Button>
             </form>
           </Box>

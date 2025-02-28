@@ -203,7 +203,7 @@ export default function PatientDetailPage({ params }) {
                     }}
                   >
                     <Image
-                      src="/icons/sleep1.png"
+                      src="/icons/sleep.png"
                       width={18}
                       height={18}
                       alt="Sleep"

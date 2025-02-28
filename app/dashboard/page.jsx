@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react"; // เพิ่มบรรทัดนี้
+import React, { useState, useEffect } from "react"; // เพิ่ม useEffect
+import { useRouter } from "next/navigation"; // เพิ่ม import router
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
@@ -13,6 +14,7 @@ import TopLocations from "@/components/charts/TopLocations";
 import MemberDevices from "@/components/charts/MemberDevices";
 import LocationTypes from "@/components/charts/LocationTypes";
 import DeviceStatus from "@/components/charts/DeviceStatus";
+
 // ปรับปรุง ChartBox component
 const ChartBox = ({ children, bgColor = "white", className = "" }) => (
   <div
@@ -107,12 +109,32 @@ const UsersCard = () => (
 );
 
 export default function Dashboard() {
+  const router = useRouter(); // เพิ่ม router
+  const [loading, setLoading] = useState(true); // เพิ่ม state สำหรับแสดง loading
   const [timeRanges, setTimeRanges] = useState({
     topLocations: "วัน",
     memberDevices: "วัน",
     locationTypes: "วัน",
     deviceStatus: "วัน",
   });
+
+  useEffect(() => {
+    // เช็คว่าเป็น role patient หรือไม่
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      if (userData.role === "patient") {
+        // ถ้าเป็น patient ให้ redirect ไปยังหน้า patient/[id]
+        const patientId = userData.id; // ดึง ID ของผู้ป่วยจาก userData
+        router.push(`/patient/${patientId}`);
+      } else {
+        // ถ้าไม่ใช่ patient ให้แสดงหน้า dashboard ปกติ
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  }, [router]);
 
   const handleTimeRangeChange = (chartId, range) => {
     setTimeRanges((prev) => ({
@@ -121,6 +143,12 @@ export default function Dashboard() {
     }));
     // ตรงนี้สามารถเพิ่มโลจิกเพื่อโหลดข้อมูลใหม่ตามช่วงเวลาที่เลือก
   };
+
+  // ถ้ากำลัง loading ให้แสดง loading state
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center">กำลังโหลด...</div>;
+  }
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-[#F5F7FD] to-[#F8F9FF]">
       <Sidebar />
